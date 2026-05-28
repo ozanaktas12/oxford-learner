@@ -10,9 +10,6 @@ const Storage = (() => {
     dailyNew: 10,
     sessionSize: 20,
     levels: ['A1', 'A2', 'B1', 'B2'],
-    apiKey: '',
-    model: 'claude-haiku-4-5-20251001',
-    aiEnabled: false,
   };
 
   const DEFAULT_STATS = {

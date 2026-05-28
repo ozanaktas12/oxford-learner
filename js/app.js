@@ -239,29 +239,16 @@ const App = (() => {
     el('q-next').classList.remove('hidden');
     el('q-input').disabled = false;
 
-    if (!correct) requestAiHelp(item.word, fb);
-  }
-
-  async function requestAiHelp(word, fb) {
-    const s = Storage.getSettings();
-    if (!s.aiEnabled || !s.apiKey) {
-      if (word.tr) fb.innerHTML += `<div class="ai">🇹🇷 ${word.tr}</div>`;
-      return;
+    // Yanlış cevapta Türkçe karşılığı ve örneği göster
+    if (!correct) {
+      const div = document.createElement('div');
+      div.className = 'ai';
+      div.innerHTML =
+        (item.word.tr ? `🇹🇷 <strong>${item.word.tr}</strong><br>` : '') +
+        `<span class="muted small">${item.word.en}</span>` +
+        (item.word.example ? `<br><span class="example">${item.word.example}</span>` : '');
+      fb.appendChild(div);
     }
-    const loading = document.createElement('div');
-    loading.className = 'ai ai-loading';
-    loading.textContent = '🤖 Açıklama hazırlanıyor…';
-    fb.appendChild(loading);
-
-    const r = await Claude.explain(word);
-    loading.remove();
-    const div = document.createElement('div');
-    div.className = 'ai';
-    if (r.error) div.textContent = '⚠️ AI açıklaması alınamadı: ' + r.error;
-    else div.innerHTML =
-      (r.tr ? `🇹🇷 <strong>${r.tr}</strong><br>` : '') +
-      (r.explanation || '');
-    fb.appendChild(div);
   }
 
   // -------------------------------------------------------------------- Stats
@@ -310,9 +297,6 @@ const App = (() => {
     const s = Storage.getSettings();
     el('daily-new').value = s.dailyNew;
     el('session-size').value = s.sessionSize;
-    el('api-key').value = s.apiKey;
-    el('model').value = s.model;
-    el('ai-enabled').checked = s.aiEnabled;
     el('levels').querySelectorAll('input').forEach(cb => {
       cb.checked = s.levels.includes(cb.value);
     });
@@ -323,9 +307,6 @@ const App = (() => {
         dailyNew: parseInt(el('daily-new').value, 10) || 0,
         sessionSize: parseInt(el('session-size').value, 10) || 20,
         levels: levels.length ? levels : ['A1'],
-        apiKey: el('api-key').value.trim(),
-        model: el('model').value,
-        aiEnabled: el('ai-enabled').checked,
       });
       const msg = el('save-msg');
       msg.textContent = '✓ Kaydedildi';
