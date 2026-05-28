@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxford Learner — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📘 Oxford Learner</div>
+    <nav class="nav">
+      <a href="index.html" class="active">Panel</a>
+      <a href="study.html">Çalış</a>
+      <a href="stats.html">İstatistik</a>
+      <a href="settings.html">Ayarlar</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Bugün öğrenmeye hazır mısın?</h1>
+      <p id="hero-sub" class="muted">Yükleniyor…</p>
+      <a href="study.html" class="btn btn-primary btn-lg">Çalışmaya başla →</a>
+    </section>
+
+    <section class="cards">
+      <div class="card stat">
+        <div class="stat-num" id="due-count">–</div>
+        <div class="stat-label">Tekrar zamanı gelen</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-num" id="new-count">–</div>
+        <div class="stat-label">Bugün yeni</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-num" id="learned-count">–</div>
+        <div class="stat-label">Öğrenilen toplam</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-num" id="total-count">–</div>
+        <div class="stat-label">Toplam kelime</div>
+      </div>
+    </section>
+
+    <section class="levels">
+      <h2>Seviyeler</h2>
+      <div id="level-bars" class="level-bars"></div>
+    </section>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sm2.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => App.initDashboard());
+  </script>
+</body>
+</html>

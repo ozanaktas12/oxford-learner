@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxford Learner — İstatistik</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📘 Oxford Learner</div>
+    <nav class="nav">
+      <a href="index.html">Panel</a>
+      <a href="study.html">Çalış</a>
+      <a href="stats.html" class="active">İstatistik</a>
+      <a href="settings.html">Ayarlar</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>İstatistik</h1>
+
+    <section class="cards">
+      <div class="card stat"><div class="stat-num" id="s-learned">–</div><div class="stat-label">Öğrenilen</div></div>
+      <div class="card stat"><div class="stat-num" id="s-reviews">–</div><div class="stat-label">Toplam tekrar</div></div>
+      <div class="card stat"><div class="stat-num" id="s-accuracy">–</div><div class="stat-label">Doğruluk</div></div>
+      <div class="card stat"><div class="stat-num" id="s-streak">–</div><div class="stat-label">Seri (gün)</div></div>
+    </section>
+
+    <section class="levels">
+      <h2>Seviyeye göre ilerleme</h2>
+      <div id="level-bars" class="level-bars"></div>
+    </section>
+
+    <section class="levels">
+      <h2>Son 14 gün</h2>
+      <div id="history-chart" class="history-chart"></div>
+    </section>
+
+    <section style="margin-top:2rem">
+      <button id="reset-btn" class="btn btn-danger">Tüm ilerlemeyi sıfırla</button>
+    </section>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sm2.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => App.initStats());
+  </script>
+</body>
+</html>

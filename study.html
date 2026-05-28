@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxford Learner — Çalış</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📘 Oxford Learner</div>
+    <nav class="nav">
+      <a href="index.html">Panel</a>
+      <a href="study.html" class="active">Çalış</a>
+      <a href="stats.html">İstatistik</a>
+      <a href="settings.html">Ayarlar</a>
+    </nav>
+  </header>
+
+  <main class="container study">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div id="session-progress" class="progress-fill"></div></div>
+      <div id="session-meta" class="muted small">0 / 0</div>
+    </div>
+
+    <!-- Flashcard (yeni kelime) -->
+    <section id="flashcard" class="panel hidden">
+      <div class="badge" id="fc-level">A1</div>
+      <div class="word" id="fc-word">word</div>
+      <div class="phon" id="fc-phon">/wɜːd/</div>
+      <div class="pos" id="fc-pos">noun</div>
+      <div id="fc-back" class="fc-back hidden">
+        <p class="def" id="fc-def"></p>
+        <p class="example" id="fc-example"></p>
+        <p class="tr" id="fc-tr"></p>
+      </div>
+      <div class="actions">
+        <button id="fc-show" class="btn btn-primary">Anlamı göster</button>
+        <div id="fc-grade" class="grade-row hidden">
+          <button class="btn btn-ghost" data-q="2">Zor</button>
+          <button class="btn btn-ghost" data-q="3">Normal</button>
+          <button class="btn btn-ghost" data-q="4">İyi</button>
+          <button class="btn btn-ghost" data-q="5">Kolay</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz (tekrar) -->
+    <section id="quiz" class="panel hidden">
+      <div class="badge" id="q-level">A1</div>
+      <p id="q-prompt" class="q-prompt"></p>
+      <div id="q-options" class="options"></div>
+      <input id="q-input" class="q-input hidden" type="text" placeholder="Cevabı yaz…" autocomplete="off" />
+      <button id="q-submit" class="btn btn-primary hidden">Kontrol et</button>
+      <div id="q-feedback" class="feedback hidden"></div>
+      <button id="q-next" class="btn btn-primary hidden">Devam →</button>
+    </section>
+
+    <!-- Bitti -->
+    <section id="done" class="panel hidden">
+      <h2>🎉 Oturum tamamlandı!</h2>
+      <p id="done-summary" class="muted"></p>
+      <a href="index.html" class="btn btn-primary">Panele dön</a>
+    </section>
+
+    <section id="empty" class="panel hidden">
+      <h2>Şimdilik bu kadar 👍</h2>
+      <p class="muted">Tekrar zamanı gelen kelime yok. Yeni kelime limitini Ayarlar'dan artırabilirsin.</p>
+      <a href="index.html" class="btn btn-primary">Panele dön</a>
+    </section>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sm2.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/claude.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => App.initStudy());
+  </script>
+</body>
+</html>
