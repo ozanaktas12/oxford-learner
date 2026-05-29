@@ -125,15 +125,19 @@ const App = (() => {
     const active = WORDS.filter(w => s.levels.includes(w.level));
 
     const due = active.filter(w => progress[w.key] && SM2.isDue(progress[w.key]));
+    const unlearned = active.filter(w => !progress[w.key]);
     const newLeft = Math.max(0, s.dailyNew - Storage.newWordsToday());
-    const fresh = Quiz.shuffle(active.filter(w => !progress[w.key])).slice(0, newLeft);
+    const fresh = Quiz.shuffle(unlearned).slice(0, newLeft);
 
-    let list = Quiz.shuffle(due).concat(fresh);
+    // Tekrar + yeni kelimeleri birbirine karıştır (hep aynı sıra/öncelik olmasın)
+    let list = Quiz.shuffle(due.concat(fresh));
 
-    // Günlük limit/tekrar bitti ama kullanıcı devam edebilsin → serbest pratik
+    // Günlük limit/tekrar bitti ama kullanıcı devam edebilsin → serbest pratik.
+    // Havuza öğrenilmemiş yeni kelimeleri de kat ki hep aynı set dönmesin.
     if (!list.length) {
       const learned = active.filter(w => progress[w.key]);
-      list = Quiz.shuffle(learned.length ? learned : active);
+      const pool = learned.concat(unlearned);
+      list = Quiz.shuffle(pool.length ? pool : active);
     }
     return list.slice(0, s.sessionSize);
   }
