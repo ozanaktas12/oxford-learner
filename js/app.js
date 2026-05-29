@@ -79,18 +79,35 @@ const App = (() => {
 
   async function initStudy() {
     await loadWords();
+    setupPicker();
+  }
+
+  /** Mod seçim ekranını (yeniden) hazırla. Oturumdan çıkışta da çağrılır. */
+  function setupPicker() {
     const words = buildWordList();
     if (!words.length) {
       el('mode-picker').classList.add('hidden');
+      el('session-wrap').classList.add('hidden');
       show('empty');
       return;
     }
+    el('done').classList.add('hidden');
+    el('empty').classList.add('hidden');
+    el('session-wrap').classList.add('hidden');
+    el('mode-picker').classList.remove('hidden');
+
     const due = words.filter(w => Storage.getCard(w.key)).length;
     el('mode-hint').textContent =
       `${words.length} kelime hazır (${due} tekrar + ${words.length - due} yeni). Bir mod seç:`;
     el('mode-picker').querySelectorAll('.mode-card').forEach(btn => {
       btn.onclick = () => startSession(btn.dataset.mode, words);
     });
+  }
+
+  /** Oturumu yarıda bırakıp mod seçimine dön (ilerleme zaten kayıtlı). */
+  function exitSession() {
+    try { speechSynthesis.cancel(); } catch (_) {}
+    setupPicker();
   }
 
   /** Oturuma girecek kelimeleri seç: tekrar zamanı gelenler + yeni kelimeler.
@@ -225,10 +242,33 @@ const App = (() => {
     banner.classList.remove('hidden');
   }
 
+  let keysBound = false;
+
   function bindStudyControls() {
     el('q-submit').onclick = submitTyped;
     el('q-next').onclick = () => { session.idx++; nextCard(); };
-    el('again-btn').onclick = () => location.reload();
+    el('again-btn').onclick = () => setupPicker();
+    el('exit-btn').onclick = exitSession;
+    if (!keysBound) { document.addEventListener('keydown', handleKey); keysBound = true; }
+  }
+
+  /** Klavye kısayolları: 1-4 şık seçer, Enter sonraki soruya geçer. */
+  function handleKey(e) {
+    if (el('quiz').classList.contains('hidden')) return;       // sadece kart modunda
+    if (e.target && e.target.id === 'q-input') return;          // yazarken araya girme
+    // Cevap verildiyse Enter ile devam
+    if (!el('q-next').classList.contains('hidden')) {
+      if (e.key === 'Enter') { e.preventDefault(); session.idx++; nextCard(); }
+      return;
+    }
+    // Çoktan seçmelide rakamla seç
+    if (currentQ && currentQ.mode === 'mcq') {
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= currentQ.options.length) {
+        const btns = el('q-options').querySelectorAll('button');
+        if (btns[n - 1] && !btns[n - 1].disabled) btns[n - 1].click();
+      }
+    }
   }
 
   // ---- Kart modları: çoktan seçmeli / yazarak / dinleme ----
@@ -269,10 +309,15 @@ const App = (() => {
       input.classList.add('hidden');
       submit.classList.add('hidden');
       optBox.innerHTML = '';
-      currentQ.options.forEach(opt => {
+      currentQ.options.forEach((opt, i) => {
         const b = document.createElement('button');
         b.className = 'option';
-        b.textContent = opt;
+        b.dataset.val = opt;
+        const num = document.createElement('span');
+        num.className = 'opt-num';
+        num.textContent = i + 1;
+        b.appendChild(num);
+        b.appendChild(document.createTextNode(opt));
         b.onclick = () => answerMcq(b, opt);
         optBox.appendChild(b);
       });
@@ -291,7 +336,7 @@ const App = (() => {
     const correct = choice === currentQ.answer;
     el('q-options').querySelectorAll('button').forEach(b => {
       b.disabled = true;
-      if (b.textContent === currentQ.answer) b.classList.add('correct');
+      if (b.dataset.val === currentQ.answer) b.classList.add('correct');
       else if (b === btn && !correct) b.classList.add('wrong');
     });
     finishQuiz(correct);

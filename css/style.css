@@ -200,6 +200,23 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .xp-tag { color: var(--amber); font-weight: 700; font-size: .9rem; }
 .combo-tag { color: var(--green); font-weight: 700; font-size: .9rem; }
 .audio-btn { margin-bottom: 1rem; }
+.exit-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  padding: .35rem .75rem; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.exit-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* Şık numarası rozeti */
+.opt-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.5rem; height: 1.5rem; margin-right: .6rem; flex: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  font-size: .8rem; font-weight: 700; color: var(--muted);
+}
+.option { display: flex; align-items: center; }
+.option.correct .opt-num { border-color: var(--green); color: var(--green); }
+.option.wrong .opt-num { border-color: var(--red); color: var(--red); }
 
 .feedback .ai { margin-top: .7rem; line-height: 1.7; }
 .feedback .ai .example { color: var(--muted); font-style: italic; }
@@ -264,9 +281,46 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .badge-tile-name { font-weight: 700; font-size: .9rem; }
 .badge-tile-desc { color: var(--muted); font-size: .75rem; }
 
-@media (max-width: 640px) {
-  .cards { grid-template-columns: repeat(2, 1fr); }
+/* ---- Mobil uyum ---- */
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; gap: .4rem .2rem; padding: .7rem 1rem; }
+  .brand { font-size: 1rem; }
+  .nav { display: flex; flex-wrap: wrap; }
+  .nav a { margin-left: 0; margin-right: 1rem; font-size: .9rem; }
+
+  .container { padding: 1.1rem .9rem 3rem; }
+  .panel { padding: 1.3rem 1.1rem; }
+  .hero { padding: 1.4rem 1.2rem; }
+  .hero h1 { font-size: 1.35rem; }
+
+  .cards { grid-template-columns: repeat(2, 1fr); gap: .7rem; }
+  .card { padding: .9rem; }
+  .stat-num { font-size: 1.5rem; }
+
+  .mode-grid { grid-template-columns: 1fr; gap: .7rem; }
+  .mode-card { flex-direction: row; gap: .8rem; text-align: left; padding: 1rem; }
+  .mode-icon { font-size: 1.6rem; }
+  .mode-desc { text-align: left; }
+
   .word { font-size: 2rem; }
-  .nav a { margin-left: .8rem; font-size: .85rem; }
-  .mode-grid { grid-template-columns: 1fr; }
+  .q-prompt { font-size: 1.1rem; }
+  .option { padding: .9rem .8rem; font-size: .95rem; }
+
+  .match-grid { gap: 1.4rem; }
+  .match-item { padding: .75rem .5rem; font-size: .9rem; }
+
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .6rem; }
+  .xp-hero { padding: 1.1rem; }
+  .xp-level { font-size: 1.2rem; }
+
+  /* dokunma hedeflerini büyüt */
+  .btn { padding: .75rem 1.1rem; }
+  .btn-lg { width: 100%; text-align: center; }
+}
+
+@media (max-width: 400px) {
+  .cards { grid-template-columns: 1fr; }
+  .nav a { margin-right: .7rem; font-size: .82rem; }
+  .word { font-size: 1.7rem; }
+  .match-grid { gap: 1rem; }
 }
