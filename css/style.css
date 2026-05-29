@@ -173,6 +173,13 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .goal-bar { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
 .goal-fill { height: 100%; width: 0; background: var(--amber); border-radius: 6px; transition: width .4s; }
 
+/* Oturum içi günlük hedef bandı */
+.goal-banner {
+  background: rgba(56,193,114,.15); border: 1px solid var(--green); color: var(--text);
+  padding: .7rem 1rem; border-radius: 10px; margin-bottom: 1rem;
+  text-align: center; font-weight: 600; font-size: .92rem;
+}
+
 /* Mod seçimi */
 .mode-grid {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.4rem;
@@ -198,17 +205,26 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .feedback .ai .example { color: var(--muted); font-style: italic; }
 .feedback .example { color: var(--muted); font-style: italic; }
 
-/* Eşleştirme */
-.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .5rem; }
+/* Eşleştirme (sürükle-bağla) */
+.match-area { position: relative; margin-top: .5rem; touch-action: none; }
+.match-lines {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 2; overflow: visible;
+}
+.match-line { stroke-width: 3; stroke-linecap: round; }
+.match-line.temp { stroke: var(--primary); stroke-dasharray: 6 5; }
+.match-line.done { stroke: var(--green); }
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; position: relative; z-index: 1; }
 .match-col { display: flex; flex-direction: column; gap: .6rem; }
 .match-item {
   background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
-  padding: .8rem; border-radius: 10px; cursor: pointer; font-size: .95rem;
-  transition: background .15s, border-color .15s;
+  padding: .8rem; border-radius: 10px; cursor: grab; font-size: .95rem;
+  text-align: center; user-select: none; touch-action: none;
+  transition: background .15s, border-color .15s, transform .08s;
 }
 .match-item:hover { border-color: var(--primary); }
-.match-item.selected { border-color: var(--primary); background: var(--surface); }
-.match-item.paired { background: rgba(56,193,114,.18); border-color: var(--green); opacity: .6; cursor: default; }
+.match-item.selected { border-color: var(--primary); background: var(--surface); transform: scale(1.03); }
+.match-item.paired { background: rgba(56,193,114,.18); border-color: var(--green); cursor: default; }
 .match-item.shake-wrong { border-color: var(--red); background: rgba(239,81,99,.18); animation: shake .4s; }
 @keyframes shake {
   0%,100% { transform: translateX(0); }

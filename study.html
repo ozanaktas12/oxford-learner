@@ -57,6 +57,8 @@
         <div id="session-meta" class="muted small">0 / 0</div>
       </div>
 
+      <div id="goal-banner" class="goal-banner hidden"></div>
+
       <!-- Tek soru (mcq / type / listen) -->
       <section id="quiz" class="panel hidden">
         <div class="badge" id="q-level">A1</div>
@@ -69,12 +71,15 @@
         <button id="q-next" class="btn btn-primary hidden">Devam →</button>
       </section>
 
-      <!-- Eşleştirme -->
+      <!-- Eşleştirme (sürükle-bağla) -->
       <section id="match" class="panel hidden">
-        <p class="q-prompt">Kelimeleri anlamlarıyla eşleştir</p>
-        <div class="match-grid">
-          <div id="match-left" class="match-col"></div>
-          <div id="match-right" class="match-col"></div>
+        <p class="q-prompt">Kelimeleri anlamlarına sürükleyerek bağla</p>
+        <div id="match-area" class="match-area">
+          <svg id="match-lines" class="match-lines"></svg>
+          <div class="match-grid">
+            <div id="match-left" class="match-col"></div>
+            <div id="match-right" class="match-col"></div>
+          </div>
         </div>
         <div id="match-feedback" class="feedback hidden"></div>
         <button id="match-next" class="btn btn-primary hidden">Devam →</button>

@@ -93,7 +93,8 @@ const App = (() => {
     });
   }
 
-  /** Oturuma girecek kelimeleri seç: tekrar zamanı gelenler + yeni kelimeler. */
+  /** Oturuma girecek kelimeleri seç: tekrar zamanı gelenler + yeni kelimeler.
+   *  Hiçbiri kalmadıysa kullanıcı yine de çalışabilsin diye serbest pratik. */
   function buildWordList() {
     const s = Storage.getSettings();
     const progress = Storage.getProgress();
@@ -103,7 +104,14 @@ const App = (() => {
     const newLeft = Math.max(0, s.dailyNew - Storage.newWordsToday());
     const fresh = Quiz.shuffle(active.filter(w => !progress[w.key])).slice(0, newLeft);
 
-    return Quiz.shuffle(due).concat(fresh).slice(0, s.sessionSize);
+    let list = Quiz.shuffle(due).concat(fresh);
+
+    // Günlük limit/tekrar bitti ama kullanıcı devam edebilsin → serbest pratik
+    if (!list.length) {
+      const learned = active.filter(w => progress[w.key]);
+      list = Quiz.shuffle(learned.length ? learned : active);
+    }
+    return list.slice(0, s.sessionSize);
   }
 
   function startSession(mode, words) {
@@ -113,8 +121,10 @@ const App = (() => {
     session.correct = 0;
     session.total = words.length;
     session.xp = 0;
+    session.goalNotified = false;
 
     el('session-wrap').classList.remove('hidden');
+    el('goal-banner').classList.add('hidden');
     bindStudyControls();
     updateXpTag();
     updateProgress();
@@ -140,13 +150,49 @@ const App = (() => {
     el(id).classList.remove('hidden');
   }
 
+  // ---- Telaffuz (Web Speech) ----
+  let preferredVoice = null;
+
+  /** En doğal/insansı İngilizce sesi seç (varsayılan robotik sesten kaçın). */
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    // Kalite sırasına göre tercih edilen sesler (Chrome/Edge/Safari)
+    const prefs = [
+      'Google US English',
+      'Microsoft Aria Online (Natural) - English (United States)',
+      'Microsoft Jenny Online (Natural) - English (United States)',
+      'Microsoft Guy Online (Natural) - English (United States)',
+      'Samantha', 'Ava', 'Allison', 'Susan', 'Karen', 'Tessa', 'Daniel',
+      'Microsoft Zira - English (United States)',
+      'Google UK English Female',
+    ];
+    for (const name of prefs) {
+      const v = voices.find(v => v.name === name);
+      if (v) return v;
+    }
+    // Yedek: yerel (cihazda yüklü) en-US sesi, sonra herhangi İngilizce
+    return voices.find(v => /en[-_]US/i.test(v.lang) && v.localService) ||
+           voices.find(v => /en[-_]US/i.test(v.lang)) ||
+           voices.find(v => /^en/i.test(v.lang)) || voices[0];
+  }
+
+  if ('speechSynthesis' in window) {
+    preferredVoice = pickVoice();
+    speechSynthesis.onvoiceschanged = () => { preferredVoice = pickVoice(); };
+  }
+
   /** Tarayıcının sesiyle İngilizce kelimeyi oku (dinleme modu). */
   function speak(text) {
     try {
       if (!('speechSynthesis' in window)) return;
+      if (!preferredVoice) preferredVoice = pickVoice();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'en-US';
-      u.rate = 0.9;
+      u.rate = 0.95;
+      u.pitch = 1;
+      if (preferredVoice) u.voice = preferredVoice;
       speechSynthesis.cancel();
       speechSynthesis.speak(u);
     } catch (e) { /* ses yoksa sessizce geç */ }
@@ -163,7 +209,20 @@ const App = (() => {
     const gained = Game.xpForAnswer(item.word, correct, mode);
     if (gained) { session.xp += gained; Storage.addXp(gained); }
     updateXpTag();
+
+    // Günlük hedefe ulaşıldıysa kutla (engelleme, devam edilebilir)
+    const goal = Storage.getSettings().dailyGoal || 20;
+    if (!session.goalNotified && Storage.reviewsToday() >= goal) {
+      session.goalNotified = true;
+      showGoalBanner(goal);
+    }
     return gained;
+  }
+
+  function showGoalBanner(goal) {
+    const banner = el('goal-banner');
+    banner.textContent = `🎉 Günlük hedefine ulaştın! (${goal} cevap) İstersen devam edebilirsin 💪`;
+    banner.classList.remove('hidden');
   }
 
   function bindStudyControls() {
@@ -274,12 +333,13 @@ const App = (() => {
 
   // ---- Eşleştirme modu ----
   let matchState = null;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
 
   function startMatchRound() {
     const group = session.queue.slice(session.idx, session.idx + 5);
     if (!group.length) { finishSession(); return; }
 
-    matchState = { group, selectedLeft: null, solved: 0, errored: new Set() };
+    matchState = { group, solved: 0, errored: new Set(), drag: null };
     show('match');
     el('match-feedback').classList.add('hidden');
     el('match-next').classList.add('hidden');
@@ -288,43 +348,91 @@ const App = (() => {
     const right = el('match-right');
     left.innerHTML = '';
     right.innerHTML = '';
+    el('match-lines').innerHTML = '';
 
-    group.forEach(item => {
-      const b = document.createElement('button');
-      b.className = 'match-item';
-      b.textContent = item.word.word;
-      b.onclick = () => selectLeft(b, item);
-      left.appendChild(b);
-    });
-    Quiz.shuffle(group).forEach(item => {
-      const b = document.createElement('button');
-      b.className = 'match-item';
-      b.textContent = item.word.tr || item.word.en;
-      b.onclick = () => selectRight(b, item);
-      right.appendChild(b);
-    });
+    group.forEach(item => left.appendChild(makeMatchItem(item.word.word, item.word.key, 'left')));
+    Quiz.shuffle(group).forEach(item =>
+      right.appendChild(makeMatchItem(item.word.tr || item.word.en, item.word.key, 'right')));
+
+    bindMatchDrag();
   }
 
-  function selectLeft(btn, item) {
-    if (btn.classList.contains('paired')) return;
-    el('match-left').querySelectorAll('.match-item').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    matchState.selectedLeft = { btn, item };
+  function makeMatchItem(text, key, side) {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.textContent = text;
+    d.dataset.key = key;
+    d.dataset.side = side;
+    return d;
   }
 
-  function selectRight(btn, item) {
-    if (btn.classList.contains('paired')) return;
-    const sel = matchState.selectedLeft;
-    if (!sel) return;
+  /** Bir öğenin bağlantı noktası (sol öğe sağ kenarı, sağ öğe sol kenarı). */
+  function itemAnchor(elm) {
+    const ar = el('match-area').getBoundingClientRect();
+    const r = elm.getBoundingClientRect();
+    const x = elm.dataset.side === 'left' ? r.right - ar.left : r.left - ar.left;
+    return { x, y: r.top - ar.top + r.height / 2 };
+  }
 
-    if (sel.item.word.key === item.word.key) {
-      // doğru eşleşme
-      [sel.btn, btn].forEach(b => {
-        b.classList.add('paired'); b.classList.remove('selected'); b.disabled = true;
-      });
-      matchState.selectedLeft = null;
+  function bindMatchDrag() {
+    const area = el('match-area');
+    const svg = el('match-lines');
+
+    function eventPoint(e) {
+      const ar = area.getBoundingClientRect();
+      return { x: e.clientX - ar.left, y: e.clientY - ar.top };
+    }
+
+    area.onpointerdown = (e) => {
+      const item = e.target.closest('.match-item');
+      if (!item || item.classList.contains('paired') || !matchState) return;
+      e.preventDefault();
+      const a = itemAnchor(item);
+      const line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('class', 'match-line temp');
+      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+      line.setAttribute('x2', a.x); line.setAttribute('y2', a.y);
+      svg.appendChild(line);
+      item.classList.add('selected');
+      matchState.drag = { item, line };
+      try { area.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+
+    area.onpointermove = (e) => {
+      const d = matchState && matchState.drag;
+      if (!d) return;
+      const p = eventPoint(e);
+      d.line.setAttribute('x2', p.x);
+      d.line.setAttribute('y2', p.y);
+    };
+
+    function endDrag(e) {
+      const d = matchState && matchState.drag;
+      if (!d) return;
+      matchState.drag = null;
+      d.item.classList.remove('selected');
+      d.line.remove();
+      const t = document.elementFromPoint(e.clientX, e.clientY);
+      const target = t && t.closest && t.closest('.match-item');
+      if (!target || target === d.item ||
+          target.dataset.side === d.item.dataset.side ||
+          target.classList.contains('paired')) {
+        return; // geçersiz bırakma
+      }
+      attemptMatch(d.item, target);
+    }
+    area.onpointerup = endDrag;
+    area.onpointercancel = endDrag;
+  }
+
+  function attemptMatch(a, b) {
+    const item = matchState.group.find(g => g.word.key === a.dataset.key);
+    if (a.dataset.key === b.dataset.key) {
+      // doğru eşleşme → kalıcı çizgi
+      [a, b].forEach(x => { x.classList.add('paired'); x.classList.remove('selected'); });
+      drawPermanentLine(a, b);
       matchState.solved++;
-      const correct = !matchState.errored.has(item.word.key);
+      const correct = !matchState.errored.has(a.dataset.key);
       recordAnswer(item, correct, 'match');
 
       if (matchState.solved >= matchState.group.length) {
@@ -341,18 +449,23 @@ const App = (() => {
         next.onclick = remaining > 0 ? startMatchRound : finishSession;
       }
     } else {
-      // yanlış eşleşme: ilgili kelimeleri işaretle, kısa kırmızı uyarı
-      matchState.errored.add(sel.item.word.key);
-      matchState.errored.add(item.word.key);
-      btn.classList.add('shake-wrong');
-      sel.btn.classList.add('shake-wrong');
-      const a = sel.btn;
-      setTimeout(() => {
-        btn.classList.remove('shake-wrong');
-        a.classList.remove('shake-wrong', 'selected');
-      }, 450);
-      matchState.selectedLeft = null;
+      // yanlış eşleşme: işaretle + kısa kırmızı uyarı
+      matchState.errored.add(a.dataset.key);
+      matchState.errored.add(b.dataset.key);
+      [a, b].forEach(x => {
+        x.classList.add('shake-wrong');
+        setTimeout(() => x.classList.remove('shake-wrong'), 450);
+      });
     }
+  }
+
+  function drawPermanentLine(a, b) {
+    const pa = itemAnchor(a), pb = itemAnchor(b);
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('class', 'match-line done');
+    line.setAttribute('x1', pa.x); line.setAttribute('y1', pa.y);
+    line.setAttribute('x2', pb.x); line.setAttribute('y2', pb.y);
+    el('match-lines').appendChild(line);
   }
 
   // ---- Oturum sonu ----
