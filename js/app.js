@@ -96,9 +96,16 @@ const App = (() => {
     el('session-wrap').classList.add('hidden');
     el('mode-picker').classList.remove('hidden');
 
-    const due = words.filter(w => Storage.getCard(w.key)).length;
-    el('mode-hint').textContent =
-      `${words.length} kelime hazır (${due} tekrar + ${words.length - due} yeni). Bir mod seç:`;
+    // Azalan "kalan kelime" yerine büyüyen/olumlu metrikler göster
+    const s = Storage.getSettings();
+    const st = Storage.getStats();
+    const learned = Object.keys(Storage.getProgress()).length;
+    const goal = s.dailyGoal || 20;
+    const today = Storage.reviewsToday();
+    el('mode-hint').textContent = learned
+      ? `🔥 ${st.streak} günlük seri · 📚 ${learned} kelime öğrendin · Bugün ${today}/${goal} hedef`
+      : 'Hadi başlayalım! İlk kelimelerini öğrenmeye hazırsın 🚀';
+
     el('mode-picker').querySelectorAll('.mode-card').forEach(btn => {
       btn.onclick = () => startSession(btn.dataset.mode, words);
     });
@@ -471,14 +478,22 @@ const App = (() => {
   }
 
   function attemptMatch(a, b) {
-    const item = matchState.group.find(g => g.word.key === a.dataset.key);
-    if (a.dataset.key === b.dataset.key) {
+    const byKey = k => matchState.group.find(g => g.word.key === k).word;
+    const left = a.dataset.side === 'left' ? a : b;
+    const right = a.dataset.side === 'left' ? b : a;
+    const leftItem = matchState.group.find(g => g.word.key === left.dataset.key);
+    const lw = byKey(left.dataset.key), rw = byKey(right.dataset.key);
+
+    // Aynı kelime VEYA aynı anlam (eş anlamlı karşılıklar için) doğru sayılır
+    const isMatch = lw.key === rw.key || (lw.tr && lw.tr === rw.tr);
+
+    if (isMatch) {
       // doğru eşleşme → kalıcı çizgi
       [a, b].forEach(x => { x.classList.add('paired'); x.classList.remove('selected'); });
       drawPermanentLine(a, b);
       matchState.solved++;
-      const correct = !matchState.errored.has(a.dataset.key);
-      recordAnswer(item, correct, 'match');
+      const correct = !matchState.errored.has(left.dataset.key);
+      recordAnswer(leftItem, correct, 'match');
 
       if (matchState.solved >= matchState.group.length) {
         session.idx += matchState.group.length;
