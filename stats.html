@@ -20,11 +20,25 @@
   <main class="container">
     <h1>İstatistik</h1>
 
+    <section class="xp-hero">
+      <div class="xp-hero-top">
+        <span id="xp-level" class="xp-level">Seviye 1</span>
+        <span id="xp-total" class="muted">0 XP toplam</span>
+      </div>
+      <div class="xp-bar"><div id="xp-fill" class="xp-fill"></div></div>
+      <p id="xp-next" class="muted small">Sonraki seviyeye 100 XP</p>
+    </section>
+
     <section class="cards">
       <div class="card stat"><div class="stat-num" id="s-learned">–</div><div class="stat-label">Öğrenilen</div></div>
       <div class="card stat"><div class="stat-num" id="s-reviews">–</div><div class="stat-label">Toplam tekrar</div></div>
       <div class="card stat"><div class="stat-num" id="s-accuracy">–</div><div class="stat-label">Doğruluk</div></div>
       <div class="card stat"><div class="stat-num" id="s-streak">–</div><div class="stat-label">Seri (gün)</div></div>
+    </section>
+
+    <section class="levels">
+      <h2>Rozetler</h2>
+      <div id="badge-grid" class="badge-grid"></div>
     </section>
 
     <section class="levels">
@@ -44,6 +58,7 @@
 
   <script src="js/storage.js"></script>
   <script src="js/sm2.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => App.initStats());

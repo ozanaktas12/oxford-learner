@@ -18,49 +18,79 @@
   </header>
 
   <main class="container study">
-    <div class="progress-wrap">
-      <div class="progress-bar"><div id="session-progress" class="progress-fill"></div></div>
-      <div id="session-meta" class="muted small">0 / 0</div>
-    </div>
-
-    <!-- Flashcard (yeni kelime) -->
-    <section id="flashcard" class="panel hidden">
-      <div class="badge" id="fc-level">A1</div>
-      <div class="word" id="fc-word">word</div>
-      <div class="phon" id="fc-phon">/wɜːd/</div>
-      <div class="pos" id="fc-pos">noun</div>
-      <div id="fc-back" class="fc-back hidden">
-        <p class="def" id="fc-def"></p>
-        <p class="example" id="fc-example"></p>
-        <p class="tr" id="fc-tr"></p>
+    <!-- Mod seçimi -->
+    <section id="mode-picker" class="panel">
+      <h2 style="margin-top:0">Bir çalışma modu seç</h2>
+      <p class="muted small" id="mode-hint">Yükleniyor…</p>
+      <div class="mode-grid">
+        <button class="mode-card" data-mode="mcq">
+          <span class="mode-icon">📝</span>
+          <span class="mode-name">Çoktan Seçmeli</span>
+          <span class="mode-desc">Şıklardan doğru anlamı/kelimeyi seç</span>
+        </button>
+        <button class="mode-card" data-mode="type">
+          <span class="mode-icon">⌨️</span>
+          <span class="mode-name">Yazarak</span>
+          <span class="mode-desc">Tanıma uyan kelimeyi yaz</span>
+        </button>
+        <button class="mode-card" data-mode="match">
+          <span class="mode-icon">🔗</span>
+          <span class="mode-name">Eşleştirme</span>
+          <span class="mode-desc">Kelimeleri anlamlarıyla eşle</span>
+        </button>
+        <button class="mode-card" data-mode="listen">
+          <span class="mode-icon">🔊</span>
+          <span class="mode-name">Dinleme</span>
+          <span class="mode-desc">Okunan kelimenin anlamını bul</span>
+        </button>
       </div>
-      <div class="actions">
-        <button id="fc-show" class="btn btn-primary">Anlamı göster</button>
-        <div id="fc-grade" class="grade-row hidden">
-          <button class="btn btn-ghost" data-q="2">Zor</button>
-          <button class="btn btn-ghost" data-q="3">Normal</button>
-          <button class="btn btn-ghost" data-q="4">İyi</button>
-          <button class="btn btn-ghost" data-q="5">Kolay</button>
+    </section>
+
+    <!-- Aktif oturum (kart bazlı modlar) -->
+    <div id="session-wrap" class="hidden">
+      <div class="progress-wrap">
+        <div class="session-top">
+          <span class="muted small">Bu oturum</span>
+          <span id="xp-tag" class="xp-tag">+0 XP</span>
         </div>
+        <div class="progress-bar"><div id="session-progress" class="progress-fill"></div></div>
+        <div id="session-meta" class="muted small">0 / 0</div>
       </div>
-    </section>
 
-    <!-- Quiz (tekrar) -->
-    <section id="quiz" class="panel hidden">
-      <div class="badge" id="q-level">A1</div>
-      <p id="q-prompt" class="q-prompt"></p>
-      <div id="q-options" class="options"></div>
-      <input id="q-input" class="q-input hidden" type="text" placeholder="Cevabı yaz…" autocomplete="off" />
-      <button id="q-submit" class="btn btn-primary hidden">Kontrol et</button>
-      <div id="q-feedback" class="feedback hidden"></div>
-      <button id="q-next" class="btn btn-primary hidden">Devam →</button>
-    </section>
+      <!-- Tek soru (mcq / type / listen) -->
+      <section id="quiz" class="panel hidden">
+        <div class="badge" id="q-level">A1</div>
+        <button id="q-audio" class="btn btn-ghost audio-btn hidden">🔊 Tekrar dinle</button>
+        <p id="q-prompt" class="q-prompt"></p>
+        <div id="q-options" class="options"></div>
+        <input id="q-input" class="q-input hidden" type="text" placeholder="Cevabı yaz…" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <button id="q-submit" class="btn btn-primary hidden">Kontrol et</button>
+        <div id="q-feedback" class="feedback hidden"></div>
+        <button id="q-next" class="btn btn-primary hidden">Devam →</button>
+      </section>
+
+      <!-- Eşleştirme -->
+      <section id="match" class="panel hidden">
+        <p class="q-prompt">Kelimeleri anlamlarıyla eşleştir</p>
+        <div class="match-grid">
+          <div id="match-left" class="match-col"></div>
+          <div id="match-right" class="match-col"></div>
+        </div>
+        <div id="match-feedback" class="feedback hidden"></div>
+        <button id="match-next" class="btn btn-primary hidden">Devam →</button>
+      </section>
+    </div>
 
     <!-- Bitti -->
     <section id="done" class="panel hidden">
       <h2>🎉 Oturum tamamlandı!</h2>
       <p id="done-summary" class="muted"></p>
-      <a href="index.html" class="btn btn-primary">Panele dön</a>
+      <div id="done-xp" class="done-xp"></div>
+      <div id="done-badges" class="badge-row"></div>
+      <div class="actions">
+        <button id="again-btn" class="btn btn-ghost">Yeni oturum</button>
+        <a href="index.html" class="btn btn-primary">Panele dön</a>
+      </div>
     </section>
 
     <section id="empty" class="panel hidden">
@@ -73,6 +103,7 @@
   <script src="js/storage.js"></script>
   <script src="js/sm2.js"></script>
   <script src="js/quiz.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => App.initStudy());

@@ -32,12 +32,49 @@ const Quiz = (() => {
     return example.replace(re, '_____');
   }
 
+  /** Türkçe karşılık çeldiricileri (dinleme modu için). */
+  function pickTrDistractors(target, pool, n = 3) {
+    let cands = pool.filter(w =>
+      w.word !== target.word &&
+      w.level === target.level &&
+      w.tr && w.tr !== target.tr);
+    if (cands.length < n) {
+      cands = pool.filter(w => w.word !== target.word && w.tr && w.tr !== target.tr);
+    }
+    return sample(cands, n);
+  }
+
   /**
    * Bir soru nesnesi üretir.
-   * dönen: { type, prompt, options[], answer, mode:'mcq'|'type', word }
+   * studyMode: 'mcq' | 'type' | 'listen' | undefined(karışık)
+   * dönen: { type, prompt, options[], answer, mode:'mcq'|'type', word, audio? }
    */
-  function generate(target, pool) {
-    const types = ['w2m', 'm2w', 'fill', 'type'];
+  function generate(target, pool, studyMode) {
+    // Dinleme modu: kelime sesli okunur, Türkçe anlamı seçilir
+    if (studyMode === 'listen') {
+      const distractors = pickTrDistractors(target, pool);
+      const options = shuffle([target, ...distractors].map(w => w.tr));
+      return {
+        type: 'listen', mode: 'mcq', word: target, audio: target.word,
+        prompt: '🔊 Duyduğun kelimenin anlamı nedir?',
+        options, answer: target.tr,
+      };
+    }
+
+    // Yazarak modu: her zaman tanımdan kelimeyi yaz
+    if (studyMode === 'type') {
+      return {
+        type: 'type', mode: 'type', word: target,
+        prompt: `Tanıma uyan kelimeyi yaz:\n“${target.en}”`,
+        options: [], answer: target.word,
+      };
+    }
+
+    // Çoktan seçmeli mod: w2m / m2w / fill arasından
+    // (mod belirtilmemişse 'type' de dahil karışık)
+    const types = studyMode === 'mcq'
+      ? ['w2m', 'm2w', 'fill']
+      : ['w2m', 'm2w', 'fill', 'type'];
     let type = types[Math.floor(Math.random() * types.length)];
 
     // fill yalnızca örnek cümlede kelime geçiyorsa kullanılabilir

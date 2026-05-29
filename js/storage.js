@@ -9,12 +9,15 @@ const Storage = (() => {
   const DEFAULT_SETTINGS = {
     dailyNew: 10,
     sessionSize: 20,
+    dailyGoal: 20,    // günlük hedef (cevap sayısı)
     levels: ['A1', 'A2', 'B1', 'B2'],
   };
 
   const DEFAULT_STATS = {
     reviews: 0,
     correct: 0,
+    xp: 0,            // toplam kazanılan XP
+    badges: [],       // açılan rozet id'leri
     history: {},      // 'YYYY-MM-DD' -> reviewed count
     streak: 0,
     lastDay: null,
@@ -82,6 +85,21 @@ const Storage = (() => {
     saveStats(s);
   }
 
+  /** XP ekle, güncel toplamı döndür. */
+  function addXp(amount) {
+    if (!amount) return getStats().xp;
+    const s = getStats();
+    s.xp = (s.xp || 0) + amount;
+    saveStats(s);
+    return s.xp;
+  }
+
+  /** Bugün verilen cevap sayısı (günlük hedef için). */
+  function reviewsToday() {
+    const s = getStats();
+    return s.history[today()] || 0;
+  }
+
   function reset() {
     localStorage.removeItem(KEYS.progress);
     localStorage.removeItem(KEYS.stats);
@@ -90,8 +108,8 @@ const Storage = (() => {
   return {
     getSettings, saveSettings,
     getProgress, getCard, saveCard,
-    getStats, saveStats,
-    recordNewWord, newWordsToday, recordReview,
+    getStats, saveStats, addXp,
+    recordNewWord, newWordsToday, recordReview, reviewsToday,
     today, reset,
   };
 })();

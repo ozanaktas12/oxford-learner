@@ -19,8 +19,16 @@
 
   <main class="container">
     <section class="hero">
+      <div class="hero-chips">
+        <span id="hero-level" class="hero-chip">⭐ Seviye 1</span>
+        <span id="hero-streak" class="hero-chip">🔥 0 gün</span>
+      </div>
       <h1>Bugün öğrenmeye hazır mısın?</h1>
       <p id="hero-sub" class="muted">Yükleniyor…</p>
+      <div class="goal-wrap">
+        <div class="goal-bar"><div id="goal-fill" class="goal-fill"></div></div>
+        <p id="goal-text" class="muted small">Günlük hedef: 0/20 cevap</p>
+      </div>
       <a href="study.html" class="btn btn-primary btn-lg">Çalışmaya başla →</a>
     </section>
 
@@ -51,6 +59,7 @@
 
   <script src="js/storage.js"></script>
   <script src="js/sm2.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => App.initDashboard());

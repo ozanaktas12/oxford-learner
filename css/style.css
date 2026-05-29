@@ -163,8 +163,94 @@ body {
 .checks label { font-weight: 400; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
+/* Hero chips + günlük hedef */
+.hero-chips { display: flex; gap: .6rem; margin-bottom: .8rem; }
+.hero-chip {
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: .25rem .7rem; border-radius: 20px; font-size: .85rem; font-weight: 600;
+}
+.goal-wrap { margin: 1.2rem 0 .4rem; }
+.goal-bar { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.goal-fill { height: 100%; width: 0; background: var(--amber); border-radius: 6px; transition: width .4s; }
+
+/* Mod seçimi */
+.mode-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.4rem;
+}
+.mode-card {
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: var(--radius); padding: 1.4rem 1rem; cursor: pointer;
+  transition: transform .08s, border-color .15s, background .15s;
+}
+.mode-card:hover { border-color: var(--primary); background: var(--surface); transform: translateY(-2px); }
+.mode-icon { font-size: 2rem; }
+.mode-name { font-weight: 700; font-size: 1.05rem; }
+.mode-desc { color: var(--muted); font-size: .82rem; text-align: center; }
+
+/* Oturum üst bilgi */
+.session-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+.xp-tag { color: var(--amber); font-weight: 700; font-size: .9rem; }
+.combo-tag { color: var(--green); font-weight: 700; font-size: .9rem; }
+.audio-btn { margin-bottom: 1rem; }
+
+.feedback .ai { margin-top: .7rem; line-height: 1.7; }
+.feedback .ai .example { color: var(--muted); font-style: italic; }
+.feedback .example { color: var(--muted); font-style: italic; }
+
+/* Eşleştirme */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .5rem; }
+.match-col { display: flex; flex-direction: column; gap: .6rem; }
+.match-item {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  padding: .8rem; border-radius: 10px; cursor: pointer; font-size: .95rem;
+  transition: background .15s, border-color .15s;
+}
+.match-item:hover { border-color: var(--primary); }
+.match-item.selected { border-color: var(--primary); background: var(--surface); }
+.match-item.paired { background: rgba(56,193,114,.18); border-color: var(--green); opacity: .6; cursor: default; }
+.match-item.shake-wrong { border-color: var(--red); background: rgba(239,81,99,.18); animation: shake .4s; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Oturum sonu */
+.done-xp { font-size: 1.3rem; font-weight: 700; color: var(--amber); margin: .8rem 0; }
+.badge-row { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin: 1rem 0; }
+.badge-chip {
+  background: rgba(246,183,60,.15); border: 1px solid var(--amber); color: var(--text);
+  padding: .35rem .9rem; border-radius: 20px; font-weight: 600;
+}
+
+/* İstatistik: XP başlığı */
+.xp-hero {
+  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.4rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);
+}
+.xp-hero-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .6rem; }
+.xp-level { font-size: 1.4rem; font-weight: 700; color: var(--amber); }
+.xp-bar { height: 12px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.xp-fill { height: 100%; width: 0; background: var(--amber); border-radius: 6px; transition: width .5s; }
+
+/* Rozet ızgarası */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .8rem; }
+.badge-tile {
+  display: flex; flex-direction: column; align-items: center; gap: .25rem; text-align: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem .6rem;
+}
+.badge-tile.earned { border-color: var(--amber); background: rgba(246,183,60,.08); }
+.badge-tile.locked { opacity: .5; }
+.badge-tile-icon { font-size: 1.8rem; }
+.badge-tile-name { font-weight: 700; font-size: .9rem; }
+.badge-tile-desc { color: var(--muted); font-size: .75rem; }
+
 @media (max-width: 640px) {
   .cards { grid-template-columns: repeat(2, 1fr); }
   .word { font-size: 2rem; }
   .nav a { margin-left: .8rem; font-size: .85rem; }
+  .mode-grid { grid-template-columns: 1fr; }
 }
