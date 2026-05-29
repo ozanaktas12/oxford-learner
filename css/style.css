@@ -47,13 +47,41 @@ body {
 
 /* Hero */
 .hero {
-  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+  position: relative; overflow: hidden;
+  background: radial-gradient(120% 140% at 100% 0%, rgba(108,140,255,.22), transparent 55%),
+              linear-gradient(135deg, var(--surface-2), var(--surface));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2rem; margin-bottom: 1.5rem;
   box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
 }
+.hero-main { flex: 1; min-width: 240px; }
 .hero h1 { margin: 0 0 .4rem; font-size: 1.6rem; }
+
+/* XP ilerleme çubuğu (hero) */
+.hero-xp { margin: 1.1rem 0 1.3rem; }
+.hero-xp-bar { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.hero-xp-fill {
+  height: 100%; width: 0; border-radius: 6px;
+  background: linear-gradient(90deg, var(--primary), #9db3ff);
+  transition: width .6s ease;
+}
+.hero-xp-text { display: block; margin-top: .4rem; }
+
+/* Günlük hedef halkası */
+.hero-ring { position: relative; width: 132px; height: 132px; flex: none; }
+.ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--surface-2); stroke-width: 10; }
+.ring-fg {
+  fill: none; stroke: var(--amber); stroke-width: 10; stroke-linecap: round;
+  transition: stroke-dashoffset .7s ease;
+}
+.ring-label {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .1rem;
+}
+#ring-pct { font-size: 1.4rem; font-weight: 800; color: var(--amber); }
 
 /* Cards / stats */
 .cards {
@@ -63,9 +91,16 @@ body {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.1rem;
 }
-.stat { text-align: center; }
-.stat-num { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+.stat { text-align: center; transition: transform .12s, border-color .15s, box-shadow .15s; }
+.stat:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: var(--shadow); }
+.stat-icon { font-size: 1.7rem; line-height: 1; margin-bottom: .35rem; }
+.stat-num { font-size: 1.9rem; font-weight: 800; color: var(--primary); }
 .stat-label { color: var(--muted); font-size: .85rem; margin-top: .2rem; }
+/* kartlara renk vurgusu */
+#due-count { color: var(--amber); }
+#new-count { color: var(--primary); }
+#learned-count { color: var(--green); }
+#total-count { color: var(--text); }
 
 /* Levels */
 .levels { margin-bottom: 2rem; }
@@ -290,8 +325,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
   .container { padding: 1.1rem .9rem 3rem; }
   .panel { padding: 1.3rem 1.1rem; }
-  .hero { padding: 1.4rem 1.2rem; }
+  .hero { padding: 1.4rem 1.2rem; justify-content: center; gap: 1.2rem; }
   .hero h1 { font-size: 1.35rem; }
+  .hero-ring { width: 112px; height: 112px; }
 
   .cards { grid-template-columns: repeat(2, 1fr); gap: .7rem; }
   .card { padding: .9rem; }

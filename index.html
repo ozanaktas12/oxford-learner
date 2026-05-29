@@ -19,33 +19,50 @@
 
   <main class="container">
     <section class="hero">
-      <div class="hero-chips">
-        <span id="hero-level" class="hero-chip">⭐ Seviye 1</span>
-        <span id="hero-streak" class="hero-chip">🔥 0 gün</span>
+      <div class="hero-main">
+        <div class="hero-chips">
+          <span id="hero-level" class="hero-chip">⭐ Seviye 1</span>
+          <span id="hero-streak" class="hero-chip">🔥 0 gün</span>
+        </div>
+        <h1 id="hero-title">Bugün harika bir gün! 🌟</h1>
+        <p id="hero-sub" class="muted">Yükleniyor…</p>
+        <div class="hero-xp">
+          <div class="hero-xp-bar"><div id="hero-xp-fill" class="hero-xp-fill"></div></div>
+          <span id="hero-xp-text" class="muted small"></span>
+        </div>
+        <a href="study.html" class="btn btn-primary btn-lg">Çalışmaya başla →</a>
       </div>
-      <h1>Bugün öğrenmeye hazır mısın?</h1>
-      <p id="hero-sub" class="muted">Yükleniyor…</p>
-      <div class="goal-wrap">
-        <div class="goal-bar"><div id="goal-fill" class="goal-fill"></div></div>
-        <p id="goal-text" class="muted small">Günlük hedef: 0/20 cevap</p>
+
+      <div class="hero-ring" title="Günlük hedef">
+        <svg viewBox="0 0 120 120" class="ring-svg">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle id="ring-fg" class="ring-fg" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="ring-label">
+          <span id="ring-pct">0%</span>
+          <span class="muted small">günlük hedef</span>
+        </div>
       </div>
-      <a href="study.html" class="btn btn-primary btn-lg">Çalışmaya başla →</a>
     </section>
 
     <section class="cards">
       <div class="card stat">
+        <div class="stat-icon">🔁</div>
         <div class="stat-num" id="due-count">–</div>
         <div class="stat-label">Tekrar zamanı gelen</div>
       </div>
       <div class="card stat">
+        <div class="stat-icon">✨</div>
         <div class="stat-num" id="new-count">–</div>
         <div class="stat-label">Bugün yeni</div>
       </div>
       <div class="card stat">
+        <div class="stat-icon">✅</div>
         <div class="stat-num" id="learned-count">–</div>
         <div class="stat-label">Öğrenilen toplam</div>
       </div>
       <div class="card stat">
+        <div class="stat-icon">📚</div>
         <div class="stat-num" id="total-count">–</div>
         <div class="stat-label">Toplam kelime</div>
       </div>

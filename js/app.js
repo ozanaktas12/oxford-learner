@@ -36,23 +36,36 @@ const App = (() => {
     el('new-count').textContent = newLeft;
     el('learned-count').textContent = learned;
     el('total-count').textContent = active.length;
-    el('hero-sub').textContent =
-      `${due} tekrar + ${newLeft} yeni kelime seni bekliyor.`;
 
-    // Seviye + XP rozeti
+    // Seviye + seri rozetleri
     const st = Storage.getStats();
     const info = Game.levelInfo(st.xp);
     el('hero-level').textContent = `⭐ Seviye ${info.level}`;
     el('hero-streak').textContent = `🔥 ${st.streak} gün`;
 
-    // Günlük hedef
+    // Pozitif/motive edici hero yazısı (azalan sayı framing'i yerine)
     const doneToday = Storage.reviewsToday();
     const goal = s.dailyGoal || 20;
+    if (!learned) {
+      el('hero-sub').textContent = 'İlk kelimelerini öğrenmeye hazırsın 🚀';
+    } else if (doneToday >= goal) {
+      el('hero-sub').textContent = `Bugünkü hedefini tamamladın, harikasın! 🎉 Dilersen devam et.`;
+    } else {
+      el('hero-sub').textContent = `${learned} kelime biliyorsun — böyle devam! 💪`;
+    }
+
+    // XP / seviye ilerleme çubuğu
+    el('hero-xp-fill').style.width = info.pct + '%';
+    el('hero-xp-text').textContent =
+      `Seviye ${info.level} · ${info.into}/${info.span} XP (sonraki seviyeye ${info.toNext})`;
+
+    // Günlük hedef halkası
     const gpct = Math.min(100, Math.round((doneToday / goal) * 100));
-    el('goal-fill').style.width = gpct + '%';
-    el('goal-text').textContent = doneToday >= goal
-      ? `🎉 Günlük hedef tamam! (${doneToday}/${goal})`
-      : `Günlük hedef: ${doneToday}/${goal} cevap`;
+    const ring = el('ring-fg');
+    const CIRC = 2 * Math.PI * 52;
+    ring.style.strokeDasharray = CIRC;
+    ring.style.strokeDashoffset = CIRC * (1 - gpct / 100);
+    el('ring-pct').textContent = `${doneToday}/${goal}`;
 
     renderLevelBars(el('level-bars'), active, progress);
   }
