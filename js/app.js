@@ -30,10 +30,8 @@ const App = (() => {
         if (SM2.isDue(c)) due++;
       }
     });
-    const newLeft = Math.max(0, s.dailyNew - Storage.newWordsToday());
-
     el('due-count').textContent = due;
-    el('new-count').textContent = newLeft;
+    el('today-count').textContent = Storage.reviewsToday();
     el('learned-count').textContent = learned;
     el('total-count').textContent = active.length;
 
@@ -136,23 +134,25 @@ const App = (() => {
     const s = Storage.getSettings();
     const progress = Storage.getProgress();
     const active = WORDS.filter(w => s.levels.includes(w.level));
+    const size = s.sessionSize || 20;
 
-    const due = active.filter(w => progress[w.key] && SM2.isDue(progress[w.key]));
-    const unlearned = active.filter(w => !progress[w.key]);
-    const newLeft = Math.max(0, s.dailyNew - Storage.newWordsToday());
-    const fresh = Quiz.shuffle(unlearned).slice(0, newLeft);
+    const due = Quiz.shuffle(active.filter(w => progress[w.key] && SM2.isDue(progress[w.key])));
+    const unlearned = Quiz.shuffle(active.filter(w => !progress[w.key]));
 
-    // Tekrar + yeni kelimeleri birbirine karıştır (hep aynı sıra/öncelik olmasın)
-    let list = Quiz.shuffle(due.concat(fresh));
+    // Tekrarlar önceliklidir; yeni kelime varsa oturumun ~%30'unu onlara ayır.
+    const newQuota = unlearned.length ? Math.ceil(size * 0.3) : 0;
+    const dueTake = Math.min(due.length, size - newQuota);
+    let list = due.slice(0, dueTake);
+    list = list.concat(unlearned.slice(0, size - list.length)); // yeni kelimelerle doldur
+    if (list.length < size) list = list.concat(due.slice(dueTake)); // yeni bittiyse kalan tekrarlar
 
-    // Günlük limit/tekrar bitti ama kullanıcı devam edebilsin → serbest pratik.
-    // Havuza öğrenilmemiş yeni kelimeleri de kat ki hep aynı set dönmesin.
+    // Hiçbiri yoksa kullanıcı yine de çalışabilsin → serbest pratik
     if (!list.length) {
-      const learned = active.filter(w => progress[w.key]);
-      const pool = learned.concat(unlearned);
-      list = Quiz.shuffle(pool.length ? pool : active);
+      list = Quiz.shuffle(active.filter(w => progress[w.key]).concat(unlearned));
     }
-    return list.slice(0, s.sessionSize);
+
+    // Tekrar + yeni iç içe gelsin diye sırayı karıştır
+    return Quiz.shuffle(list.slice(0, size));
   }
 
   function startSession(mode, words) {
@@ -231,7 +231,8 @@ const App = (() => {
       if (!preferredVoice) preferredVoice = pickVoice();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'en-US';
-      u.rate = 0.95;
+      const rates = { slow: 0.7, normal: 0.95, fast: 1.2 };
+      u.rate = rates[Storage.getSettings().speechRate] || 0.95;
       u.pitch = 1;
       if (preferredVoice) u.voice = preferredVoice;
       speechSynthesis.cancel();
@@ -396,6 +397,9 @@ const App = (() => {
       `<span class="muted small">${w.en}</span>` +
       (w.example ? `<br><span class="example">${w.example}</span>` : '');
     fb.appendChild(div);
+
+    // Ayar açıksa kelimeyi seslendir (dinleme modunda zaten okundu)
+    if (Storage.getSettings().autoSpeak && session.mode !== 'listen') speak(w.word);
 
     el('q-next').classList.remove('hidden');
   }
@@ -641,9 +645,10 @@ const App = (() => {
   // ----------------------------------------------------------------- Settings
   function initSettings() {
     const s = Storage.getSettings();
-    el('daily-new').value = s.dailyNew;
     el('session-size').value = s.sessionSize;
     el('daily-goal').value = s.dailyGoal;
+    el('speech-rate').value = s.speechRate;
+    el('auto-speak').checked = s.autoSpeak;
     el('levels').querySelectorAll('input').forEach(cb => {
       cb.checked = s.levels.includes(cb.value);
     });
@@ -651,9 +656,10 @@ const App = (() => {
     el('save-btn').onclick = () => {
       const levels = [...el('levels').querySelectorAll('input:checked')].map(c => c.value);
       Storage.saveSettings({
-        dailyNew: parseInt(el('daily-new').value, 10) || 0,
         sessionSize: parseInt(el('session-size').value, 10) || 20,
         dailyGoal: parseInt(el('daily-goal').value, 10) || 20,
+        speechRate: el('speech-rate').value,
+        autoSpeak: el('auto-speak').checked,
         levels: levels.length ? levels : ['A1'],
       });
       const msg = el('save-msg');

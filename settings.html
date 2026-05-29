@@ -23,34 +23,60 @@
   <main class="container narrow">
     <h1>Ayarlar</h1>
 
-    <div class="form-group">
-      <label for="daily-new">Günlük yeni kelime limiti</label>
-      <input id="daily-new" type="number" min="0" max="100" />
-      <p class="muted small">Her gün kaç yeni kelime gösterilsin.</p>
-    </div>
+    <section class="settings-group">
+      <h2>📚 Çalışma</h2>
 
-    <div class="form-group">
-      <label for="session-size">Oturum başına kart sayısı</label>
-      <input id="session-size" type="number" min="5" max="100" />
-    </div>
-
-    <div class="form-group">
-      <label for="daily-goal">Günlük hedef (cevap sayısı)</label>
-      <input id="daily-goal" type="number" min="5" max="200" />
-      <p class="muted small">Panelde günlük ilerleme çubuğu bu hedefe göre dolar.</p>
-    </div>
-
-    <div class="form-group">
-      <label for="levels">Çalışılacak seviyeler</label>
-      <div id="levels" class="checks">
-        <label><input type="checkbox" value="A1" /> A1</label>
-        <label><input type="checkbox" value="A2" /> A2</label>
-        <label><input type="checkbox" value="B1" /> B1</label>
-        <label><input type="checkbox" value="B2" /> B2</label>
+      <div class="form-group">
+        <label for="levels">Çalışılacak seviyeler</label>
+        <div id="levels" class="checks">
+          <label><input type="checkbox" value="A1" /> A1</label>
+          <label><input type="checkbox" value="A2" /> A2</label>
+          <label><input type="checkbox" value="B1" /> B1</label>
+          <label><input type="checkbox" value="B2" /> B2</label>
+        </div>
+        <p class="muted small">Yalnızca seçtiğin zorluk seviyelerindeki kelimeler çalışmaya girer.</p>
       </div>
-    </div>
 
-    <div class="actions">
+      <div class="form-group">
+        <label for="session-size">Her oturumda kelime sayısı</label>
+        <input id="session-size" type="number" min="5" max="50" />
+        <p class="muted small">Bir çalışma turunda kaç kelimeyle karşılaşacağın. Tekrar zamanı gelenler öncelikli; kalan yerler yeni kelimelerle dolar.</p>
+      </div>
+    </section>
+
+    <section class="settings-group">
+      <h2>🎯 Hedef</h2>
+
+      <div class="form-group">
+        <label for="daily-goal">Günlük hedef (cevap)</label>
+        <input id="daily-goal" type="number" min="5" max="200" />
+        <p class="muted small">Paneldeki günlük halka bu hedefe göre dolar ve serini besler. Sadece motivasyon içindir — seni durdurmaz.</p>
+      </div>
+    </section>
+
+    <section class="settings-group">
+      <h2>🔊 Telaffuz</h2>
+
+      <div class="form-group">
+        <label for="speech-rate">Konuşma hızı</label>
+        <select id="speech-rate">
+          <option value="slow">Yavaş</option>
+          <option value="normal">Normal</option>
+          <option value="fast">Hızlı</option>
+        </select>
+        <p class="muted small">Dinleme modunda ve seslendirmede kullanılacak okuma hızı.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="switch-label" for="auto-speak">
+          <input id="auto-speak" type="checkbox" />
+          Cevaptan sonra kelimeyi otomatik seslendir
+        </label>
+        <p class="muted small">Her soruyu cevapladıktan sonra kelimenin İngilizce okunuşunu duyarsın.</p>
+      </div>
+    </section>
+
+    <div class="actions" style="justify-content:flex-start">
       <button id="save-btn" class="btn btn-primary">Kaydet</button>
       <span id="save-msg" class="muted small"></span>
     </div>

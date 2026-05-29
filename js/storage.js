@@ -7,9 +7,10 @@ const Storage = (() => {
   };
 
   const DEFAULT_SETTINGS = {
-    dailyNew: 10,
     sessionSize: 20,
-    dailyGoal: 20,    // günlük hedef (cevap sayısı)
+    dailyGoal: 20,        // günlük hedef (cevap sayısı)
+    speechRate: 'normal', // 'slow' | 'normal' | 'fast'
+    autoSpeak: false,     // cevaptan sonra kelimeyi otomatik seslendir
     levels: ['A1', 'A2', 'B1', 'B2'],
   };
 
