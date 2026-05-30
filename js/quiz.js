@@ -27,7 +27,8 @@ const Quiz = (() => {
 
   function blankExample(word, example) {
     if (!example) return null;
-    const re = new RegExp('\\b' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    // tüm geçişleri boşalt (yoksa ikinci geçiş cevabı ele verir)
+    const re = new RegExp('\\b' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
     if (!re.test(example)) return null;
     return example.replace(re, '_____');
   }
@@ -67,6 +68,35 @@ const Quiz = (() => {
         type: 'type', mode: 'type', word: target,
         prompt: `Tanıma uyan kelimeyi yaz:\n“${target.en}”`,
         options: [], answer: target.word,
+      };
+    }
+
+    // Boşluk doldurma: örnek cümlede kelime boş bırakılır, doğru kelime seçilir.
+    // Örnekte kelime yoksa tanımdan kelime seçmeye düşülür.
+    if (studyMode === 'fill') {
+      const distractors = pickDistractors(target, pool);
+      const options = shuffle([target, ...distractors].map(w => w.word));
+      const blanked = blankExample(target.word, target.example);
+      if (blanked) {
+        return {
+          type: 'fill', mode: 'mcq', word: target,
+          prompt: `Boşluğu doldur:\n“${blanked}”`,
+          options, answer: target.word,
+        };
+      }
+      return {
+        type: 'm2w', mode: 'mcq', word: target,
+        prompt: `Bu tanıma uyan kelime hangisi?\n“${target.en}”`,
+        options, answer: target.word,
+      };
+    }
+
+    // Kelime dizme: karışık harflerden kelimeyi kur (anlam ipucu verilir)
+    if (studyMode === 'scramble') {
+      return {
+        type: 'scramble', mode: 'scramble', word: target, answer: target.word,
+        prompt: `Harfleri dizerek kelimeyi oluştur:\n🇹🇷 ${target.tr || target.en}`,
+        options: [],
       };
     }
 

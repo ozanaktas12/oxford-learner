@@ -340,7 +340,9 @@ const App = (() => {
     const input = el('q-input');
     const submit = el('q-submit');
 
-    if (currentQ.mode === 'mcq') {
+    if (currentQ.mode === 'scramble') {
+      renderScramble(currentQ);
+    } else if (currentQ.mode === 'mcq') {
       optBox.classList.remove('hidden');
       input.classList.add('hidden');
       submit.classList.add('hidden');
@@ -366,6 +368,73 @@ const App = (() => {
       input.focus();
       input.onkeydown = (e) => { if (e.key === 'Enter') submitTyped(); };
     }
+  }
+
+  /** Kelime dizme: karışık harf taşlarından kelimeyi kur. */
+  function renderScramble(q) {
+    const target = (q.answer || '').toLowerCase();
+    el('q-options').classList.remove('hidden');
+    el('q-input').classList.add('hidden');
+    el('q-submit').classList.add('hidden');
+
+    const pool = Quiz.shuffle(target.split('')).map(ch => ({ ch, used: false }));
+    const placed = [];     // yerleştirilen taşların pool indeksleri
+    let answered = false;
+
+    const box = el('q-options');
+    box.innerHTML = '';
+    const slotRow = document.createElement('div'); slotRow.className = 'scramble-slots';
+    const poolRow = document.createElement('div'); poolRow.className = 'scramble-pool';
+    box.appendChild(slotRow);
+    box.appendChild(poolRow);
+
+    const tiles = pool.map((p, i) => {
+      const t = document.createElement('button');
+      t.className = 'scramble-tile';
+      t.textContent = p.ch;
+      t.onclick = () => place(i);
+      poolRow.appendChild(t);
+      return t;
+    });
+
+    function redraw() {
+      slotRow.innerHTML = '';
+      for (let i = 0; i < target.length; i++) {
+        const s = document.createElement('div');
+        s.className = 'scramble-slot';
+        if (i < placed.length) {
+          s.textContent = pool[placed[i]].ch;
+          s.classList.add('filled');
+          const pos = i;
+          s.onclick = () => remove(pos);
+        }
+        slotRow.appendChild(s);
+      }
+      pool.forEach((p, i) => tiles[i].classList.toggle('used', p.used));
+    }
+
+    function place(i) {
+      if (answered || pool[i].used) return;
+      pool[i].used = true;
+      placed.push(i);
+      redraw();
+      if (placed.length === target.length) check();
+    }
+
+    function remove(pos) {
+      if (answered) return;
+      const i = placed.splice(pos, 1)[0];
+      pool[i].used = false;
+      redraw();
+    }
+
+    function check() {
+      answered = true;
+      const assembled = placed.map(i => pool[i].ch).join('');
+      finishQuiz(assembled === target);
+    }
+
+    redraw();
   }
 
   function answerMcq(btn, choice) {

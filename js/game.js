@@ -2,7 +2,7 @@
 const Game = (() => {
   // ---- XP ----
   const LEVEL_BONUS = { A1: 0, A2: 3, B1: 6, B2: 9 };
-  const MODE_BONUS = { mcq: 0, listen: 3, type: 5, match: 2 };
+  const MODE_BONUS = { mcq: 0, fill: 1, match: 2, listen: 3, scramble: 4, type: 5 };
 
   /** Bir doğru cevabın kazandırdığı XP. Yanlış = 0. */
   function xpForAnswer(word, correct, mode) {

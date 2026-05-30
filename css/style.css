@@ -302,6 +302,31 @@ a { color: inherit; }
 }
 .q-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 
+/* Kelime dizme (harf taşları) */
+.scramble-slots {
+  display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center;
+  min-height: 3.2rem; margin-bottom: 1.4rem;
+}
+.scramble-slot {
+  width: 2.7rem; height: 3rem; border: 2px dashed var(--border-strong); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem; font-weight: 800;
+}
+.scramble-slot.filled {
+  border-style: solid; border-color: var(--primary); background: var(--surface-2);
+  cursor: pointer;
+}
+.scramble-pool { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
+.scramble-tile {
+  width: 2.9rem; height: 3.1rem; border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-2); color: var(--text); font-family: inherit;
+  font-size: 1.35rem; font-weight: 800; cursor: pointer;
+  transition: transform .08s, background .15s, opacity .15s;
+}
+.scramble-tile:hover { background: var(--surface-3); }
+.scramble-tile:active { transform: translateY(1px); }
+.scramble-tile.used { opacity: .2; pointer-events: none; }
+
 .feedback { margin-top: 1.3rem; padding: 1.1rem; border-radius: var(--radius-sm); text-align: left; }
 .feedback.ok { background: var(--green-soft); border: 1px solid var(--green); }
 .feedback.no { background: var(--red-soft); border: 1px solid var(--red); }
