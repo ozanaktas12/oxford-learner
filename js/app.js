@@ -125,6 +125,8 @@ const App = (() => {
   /** Oturumu yarıda bırakıp mod seçimine dön (ilerleme zaten kayıtlı). */
   function exitSession() {
     try { speechSynthesis.cancel(); } catch (_) {}
+    // Erken çıkışta da kazanılan rozetleri kaydet
+    Game.checkBadges(Storage.getStats(), Storage.getProgress(), WORDS);
     setupPicker();
   }
 
@@ -698,6 +700,8 @@ const App = (() => {
     await loadWords();
     const st = Storage.getStats();
     const progress = Storage.getProgress();
+    // Gecikmiş rozetleri yakala (ör. oturum erken kapatıldıysa) ve kaydet
+    Game.checkBadges(st, progress, WORDS);
     const learned = Object.keys(progress).length;
     const acc = st.reviews ? Math.round((st.correct / st.reviews) * 100) : 0;
 
