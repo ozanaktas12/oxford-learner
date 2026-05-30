@@ -252,19 +252,23 @@ const App = (() => {
     if (gained) { session.xp += gained; Storage.addXp(gained); }
     updateXpTag();
 
-    // Günlük hedefe ulaşıldıysa kutla (engelleme, devam edilebilir)
+    // Günlük hedefi tam geçtiğin an bir kez kutla (sonra kendiliğinden kaybolur)
     const goal = Storage.getSettings().dailyGoal || 20;
-    if (!session.goalNotified && Storage.reviewsToday() >= goal) {
+    if (!session.goalNotified && Storage.reviewsToday() === goal) {
       session.goalNotified = true;
       showGoalBanner(goal);
     }
     return gained;
   }
 
+  let goalBannerTimer = null;
   function showGoalBanner(goal) {
     const banner = el('goal-banner');
     banner.textContent = `🎉 Günlük hedefine ulaştın! (${goal} cevap) İstersen devam edebilirsin 💪`;
     banner.classList.remove('hidden');
+    banner.onclick = () => banner.classList.add('hidden');   // dokununca da kapanır
+    clearTimeout(goalBannerTimer);
+    goalBannerTimer = setTimeout(() => banner.classList.add('hidden'), 4500);
   }
 
   let keysBound = false;
