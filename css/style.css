@@ -333,6 +333,23 @@ a { color: inherit; }
 .feedback .ai { margin-top: .7rem; line-height: 1.75; }
 .feedback .ai .example,
 .feedback .example { color: var(--muted); font-style: italic; }
+.ai-word { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; margin-bottom: .35rem; }
+.ai-word > strong { font-size: 1.08rem; }
+
+/* Okunuş dinleme butonu */
+.speak-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; padding: 0; flex: none;
+  border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--surface-2); color: var(--text); cursor: pointer; font-size: .95rem;
+  transition: background .15s, border-color .15s, transform .08s;
+}
+.speak-btn:hover { background: var(--surface-3); border-color: var(--primary); }
+.speak-btn:active { transform: translateY(1px); }
+
+/* Eşleştirmede dokununca okunan kelime taşı */
+.match-item.speakable { cursor: pointer; }
+.tile-speak { opacity: .7; font-size: .9em; }
 
 /* =========================================================================
    Çalışma: eşleştirme (sürükle-bağla)

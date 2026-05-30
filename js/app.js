@@ -467,21 +467,48 @@ const App = (() => {
       ? `✅ Doğru! <strong>+${gained} XP</strong>`
       : `❌ Yanlış. Doğru cevap: <strong>${currentQ.answer}</strong>`;
 
-    // Her durumda kelimeyi öğret: kelime + okunuş + Türkçe + tanım + örnek
+    // Her durumda kelimeyi öğret: kelime + 🔊 + okunuş + Türkçe + tanım + örnek
     const w = item.word;
     const div = document.createElement('div');
     div.className = 'ai';
-    div.innerHTML =
-      `<strong>${w.word}</strong> <span class="muted">${w.phon || ''}</span><br>` +
+
+    const wordLine = document.createElement('div');
+    wordLine.className = 'ai-word';
+    const strong = document.createElement('strong');
+    strong.textContent = w.word;
+    wordLine.appendChild(strong);
+    if (w.phon) {
+      const ph = document.createElement('span');
+      ph.className = 'muted';
+      ph.textContent = w.phon;
+      wordLine.appendChild(ph);
+    }
+    wordLine.appendChild(makeSpeakButton(w.word));
+    div.appendChild(wordLine);
+
+    const rest = document.createElement('div');
+    rest.innerHTML =
       (w.tr ? `🇹🇷 <strong>${w.tr}</strong><br>` : '') +
       `<span class="muted small">${w.en}</span>` +
       (w.example ? `<br><span class="example">${w.example}</span>` : '');
+    div.appendChild(rest);
     fb.appendChild(div);
 
-    // Ayar açıksa kelimeyi seslendir (dinleme modunda zaten okundu)
+    // Ayar açıksa kelimeyi otomatik seslendir (dinleme modunda zaten okundu)
     if (Storage.getSettings().autoSpeak && session.mode !== 'listen') speak(w.word);
 
     el('q-next').classList.remove('hidden');
+  }
+
+  /** Kelimenin okunuşunu dinleten küçük 🔊 buton. */
+  function makeSpeakButton(word) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'speak-btn';
+    b.textContent = '🔊';
+    b.title = 'Okunuşunu dinle';
+    b.onclick = () => speak(word);
+    return b;
   }
 
   // ---- Eşleştirme modu ----
@@ -592,6 +619,11 @@ const App = (() => {
       // doğru eşleşme → kalıcı çizgi
       [a, b].forEach(x => { x.classList.add('paired'); x.classList.remove('selected'); });
       drawPermanentLine(a, b);
+      // İngilizce kelime taşına dokununca okunsun
+      left.classList.add('speakable');
+      left.title = 'Okunuşunu dinle';
+      left.onclick = () => speak(lw.word);
+      left.appendChild(Object.assign(document.createElement('span'), { className: 'tile-speak', textContent: ' 🔊' }));
       matchState.solved++;
       const correct = !matchState.errored.has(left.dataset.key);
       recordAnswer(leftItem, correct, 'match');
