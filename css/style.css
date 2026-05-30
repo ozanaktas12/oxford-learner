@@ -451,6 +451,20 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
   .xp-level { font-size: 1.25rem; }
 
   .btn-lg { width: 100%; }
+
+  /* Mobilde "Devam" butonu ekranın altına sabit — başparmakla tek dokunuş,
+     içeriğe uzanmaya / kaydırmaya gerek yok */
+  .btn-next:not(.hidden) {
+    position: fixed; left: 14px; right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: auto; justify-content: center; z-index: 40; margin: 0;
+    padding: 1.05rem; font-size: 1.06rem; border-radius: 14px;
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, .7);
+    animation: nextRise .22s ease;
+  }
+  @keyframes nextRise { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  /* sabit buton son satırı örtmesin */
+  .container.study { padding-bottom: 6.5rem; }
 }
 
 @media (max-width: 400px) {
