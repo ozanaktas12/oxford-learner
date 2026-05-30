@@ -308,6 +308,10 @@ a { color: inherit; }
 .feedback .ai { margin-top: .7rem; line-height: 1.75; }
 .feedback .ai .example,
 .feedback .example { color: var(--muted); font-style: italic; }
+.tap-hint { margin-top: .9rem; color: var(--muted); font-size: .82rem; text-align: center; }
+
+/* Cevap sonrası: panele dokunarak devam (kaydırmaya gerek yok) */
+.panel.tappable { cursor: pointer; }
 
 /* =========================================================================
    Çalışma: eşleştirme (sürükle-bağla)

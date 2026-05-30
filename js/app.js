@@ -271,19 +271,47 @@ const App = (() => {
 
   function bindStudyControls() {
     el('q-submit').onclick = submitTyped;
-    el('q-next').onclick = () => { session.idx++; nextCard(); };
+    el('q-next').onclick = advanceCard;
     el('again-btn').onclick = () => setupPicker();
     el('exit-btn').onclick = exitSession;
+    el('session-wrap').onclick = onSessionTap;     // kaydırmadan dokun→geç
     if (!keysBound) { document.addEventListener('keydown', handleKey); keysBound = true; }
   }
 
-  /** Klavye kısayolları: 1-4 şık seçer, Enter sonraki soruya geçer. */
+  function advanceCard() { session.idx++; nextCard(); }
+
+  /** Cevap verildikten sonra ekranda boş bir yere dokununca sonraki adıma geç.
+   *  Buton/şık/giriş gibi etkileşimli öğelere yapılan dokunuşlar kendi işini yapar. */
+  function onSessionTap(e) {
+    if (e.target.closest('button, a, input, select')) return;
+    if (!el('quiz').classList.contains('hidden')) {
+      if (!el('q-next').classList.contains('hidden')) advanceCard();
+      return;
+    }
+    if (!el('match').classList.contains('hidden')) {
+      const next = el('match-next');
+      // turu bitiren dokunuşun kendisini yut (yanlışlıkla geçmesin)
+      if (Date.now() - (matchState && matchState.doneAt || 0) < 500) return;
+      if (!next.classList.contains('hidden')) next.onclick();
+    }
+  }
+
+  /** Klavye: 1-4 şık seçer, Enter/Space sonraki adıma geçer. */
   function handleKey(e) {
-    if (el('quiz').classList.contains('hidden')) return;       // sadece kart modunda
     if (e.target && e.target.id === 'q-input') return;          // yazarken araya girme
-    // Cevap verildiyse Enter ile devam
+    const advanceKey = (e.key === 'Enter' || e.key === ' ');
+
+    // Eşleştirme turu bittiyse Enter/Space ile devam
+    if (!el('match').classList.contains('hidden')) {
+      const next = el('match-next');
+      if (advanceKey && !next.classList.contains('hidden')) { e.preventDefault(); next.onclick(); }
+      return;
+    }
+    if (el('quiz').classList.contains('hidden')) return;        // sadece kart modunda
+
+    // Cevap verildiyse Enter/Space ile devam
     if (!el('q-next').classList.contains('hidden')) {
-      if (e.key === 'Enter') { e.preventDefault(); session.idx++; nextCard(); }
+      if (advanceKey) { e.preventDefault(); advanceCard(); }
       return;
     }
     // Çoktan seçmelide rakamla seç
@@ -308,6 +336,7 @@ const App = (() => {
   function renderQuiz(item) {
     const word = item.word;
     show('quiz');
+    el('quiz').classList.remove('tappable');
     el('q-level').textContent = word.level;
     el('q-feedback').classList.add('hidden');
     el('q-next').classList.add('hidden');
@@ -401,6 +430,12 @@ const App = (() => {
     // Ayar açıksa kelimeyi seslendir (dinleme modunda zaten okundu)
     if (Storage.getSettings().autoSpeak && session.mode !== 'listen') speak(w.word);
 
+    const hint = document.createElement('div');
+    hint.className = 'tap-hint';
+    hint.textContent = '👆 Devam için ekrana dokun · Enter';
+    fb.appendChild(hint);
+
+    el('quiz').classList.add('tappable');
     el('q-next').classList.remove('hidden');
   }
 
@@ -414,6 +449,7 @@ const App = (() => {
 
     matchState = { group, solved: 0, errored: new Set(), drag: null };
     show('match');
+    el('match').classList.remove('tappable');
     el('match-feedback').classList.add('hidden');
     el('match-next').classList.add('hidden');
 
@@ -523,11 +559,15 @@ const App = (() => {
         const fb = el('match-feedback');
         fb.className = 'feedback ok';
         fb.classList.remove('hidden');
-        fb.textContent = remaining > 0 ? '✅ Tur tamam!' : '✅ Hepsi bitti!';
+        fb.textContent = remaining > 0
+          ? '✅ Tur tamam! 👆 Devam için ekrana dokun · Enter'
+          : '✅ Hepsi bitti!';
         const next = el('match-next');
         next.classList.remove('hidden');
         next.textContent = remaining > 0 ? 'Sonraki tur →' : 'Bitir →';
         next.onclick = remaining > 0 ? startMatchRound : finishSession;
+        matchState.doneAt = Date.now();
+        el('match').classList.add('tappable');
       }
     } else {
       // yanlış eşleşme: işaretle + kısa kırmızı uyarı
