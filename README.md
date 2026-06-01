@@ -1,8 +1,9 @@
-# 📘 Oxford Learner
+# 📗 Kelimix
 
-Oxford 3000 kelimelerini **aralıklı tekrar (SM-2)** ile öğreten, saf
-HTML + CSS + JS bir web uygulaması. Backend yok, API anahtarı yok; tüm ilerleme
-tarayıcının `localStorage`'ında tutulur. Vercel'e statik olarak deploy edilir.
+İngilizcenin en sık kullanılan ~3800 kelimesini (Oxford 3000 listesi)
+**aralıklı tekrar (SM-2)** ve oyunlarla öğreten saf HTML + CSS + JS bir web
+uygulaması. Backend yok, API anahtarı yok; tüm ilerleme tarayıcının
+`localStorage`'ında tutulur. Vercel'e statik olarak deploy edilir.
 
 ## Özellikler
 - **Dashboard** — tekrar/yeni/öğrenilen sayıları, seviyeye göre ilerleme.

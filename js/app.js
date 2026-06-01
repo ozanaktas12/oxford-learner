@@ -14,6 +14,7 @@ const App = (() => {
   }
 
   function el(id) { return document.getElementById(id); }
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
   // ---------------------------------------------------------------- Dashboard
   async function initDashboard() {
@@ -41,16 +42,35 @@ const App = (() => {
     el('hero-level').textContent = `⭐ Seviye ${info.level}`;
     el('hero-streak').textContent = `🔥 ${st.streak} gün`;
 
-    // Pozitif/motive edici hero yazısı (azalan sayı framing'i yerine)
+    // Doğal, günün saatine ve duruma göre değişen karşılama (klişe değil)
     const doneToday = Storage.reviewsToday();
     const goal = s.dailyGoal || 20;
+    const hour = new Date().getHours();
+    el('hero-title').textContent = pick(
+      hour < 6 ? ['Hâlâ ayaktasın demek', 'Geç olmuş ama olsun']
+      : hour < 11 ? ['Günaydın', 'Günaydın ☕', 'Sabah sabah, güzel']
+      : hour < 18 ? ['Selam', 'Tekrar hoş geldin', 'Kaldığın yerden?']
+      : ['İyi akşamlar', 'Akşam turu mu?', 'Hoş geldin']
+    );
+
+    let subs;
     if (!learned) {
-      el('hero-sub').textContent = 'İlk kelimelerini öğrenmeye hazırsın 🚀';
+      subs = ['Hadi ilk kelimelerle tanışalım, acelesi yok.',
+              'Sıfırdan başlıyoruz. Birkaç dakika yeter.'];
     } else if (doneToday >= goal) {
-      el('hero-sub').textContent = `Bugünkü hedefini tamamladın, harikasın! 🎉 Dilersen devam et.`;
+      subs = ['Günlük hedefini çoktan bitirdin. Gerisi tamamen keyfine kalmış.',
+              'Bugünlük yeterince çalıştın. İstersen devam, istersen mola.',
+              `Bugün ${doneToday} cevap — hedefi geçtin bile.`];
+    } else if (due > 20) {
+      subs = [`${due} kelime tekrar bekliyor, hızlıca bakalım mı?`,
+              'Birikmiş birkaç tekrar var; ısınmak için ideal.'];
     } else {
-      el('hero-sub').textContent = `${learned} kelime biliyorsun — böyle devam! 💪`;
+      subs = [`${learned} kelime cebinde. Bugün birkaç tane daha ekleyelim.`,
+              `Şu ana kadar ${learned} kelime — fena gitmiyorsun.`,
+              'Kısa bir tur bile arayı açar.',
+              'Nereden devam etsek?'];
     }
+    el('hero-sub').textContent = pick(subs);
 
     // XP / seviye ilerleme çubuğu
     el('hero-xp-fill').style.width = info.pct + '%';
@@ -116,8 +136,8 @@ const App = (() => {
     const goal = s.dailyGoal || 20;
     const today = Storage.reviewsToday();
     el('mode-hint').textContent = learned
-      ? `🔥 ${st.streak} günlük seri · 📚 ${learned} kelime öğrendin · Bugün ${today}/${goal} hedef`
-      : 'Hadi başlayalım! İlk kelimelerini öğrenmeye hazırsın 🚀';
+      ? `🔥 ${st.streak} günlük seri · ${learned} kelime · bugün ${today}/${goal}`
+      : 'Hazır olduğunda bir mod seç, başlayalım.';
 
     el('mode-picker').querySelectorAll('.mode-card').forEach(btn => {
       btn.onclick = () => startSession(btn.dataset.mode, words);
@@ -281,7 +301,11 @@ const App = (() => {
   let goalBannerTimer = null;
   function showGoalBanner(goal) {
     const banner = el('goal-banner');
-    banner.textContent = `🎉 Günlük hedefine ulaştın! (${goal} cevap) İstersen devam edebilirsin 💪`;
+    banner.textContent = pick([
+      `Günlük hedefini tamamladın 👏 İstersen devam, istersen burada bırak.`,
+      `${goal} cevap tamam — bugünlük üstüne düşeni yaptın. Gerisi keyfine kalmış.`,
+      `Hedefe ulaştın. Devam etmek tamamen sana kalmış.`,
+    ]);
     banner.classList.remove('hidden');
     banner.onclick = () => banner.classList.add('hidden');   // dokununca da kapanır
     clearTimeout(goalBannerTimer);
@@ -687,6 +711,10 @@ const App = (() => {
   // ---- Oturum sonu ----
   function finishSession() {
     const acc = session.total ? Math.round((session.correct / session.total) * 100) : 0;
+    el('done-title').textContent = pick(
+      acc >= 80 ? ['İyi gidiyor 👏', 'Bu tur temizdi', 'Güzel çalışma']
+      : ['Tur bitti', 'Oturum tamam', 'Eh, fena değil']
+    );
     el('done-summary').textContent =
       `${session.total} kelime · ${session.correct} doğru (%${acc}).`;
     el('done-xp').textContent = `+${session.xp} XP kazandın!`;
