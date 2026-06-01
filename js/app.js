@@ -39,8 +39,8 @@ const App = (() => {
     // Seviye + seri rozetleri
     const st = Storage.getStats();
     const info = Game.levelInfo(st.xp);
-    el('hero-level').textContent = `⭐ Seviye ${info.level}`;
-    el('hero-streak').textContent = `🔥 ${st.streak} gün`;
+    el('hero-level').textContent = `Seviye ${info.level}`;
+    el('hero-streak').textContent = `${st.streak} gün seri`;
 
     // Doğal, günün saatine ve duruma göre değişen karşılama (klişe değil)
     const doneToday = Storage.reviewsToday();
@@ -48,7 +48,7 @@ const App = (() => {
     const hour = new Date().getHours();
     el('hero-title').textContent = pick(
       hour < 6 ? ['Hâlâ ayaktasın demek', 'Geç olmuş ama olsun']
-      : hour < 11 ? ['Günaydın', 'Günaydın ☕', 'Sabah sabah, güzel']
+      : hour < 11 ? ['Günaydın', 'Sabah sabah, güzel']
       : hour < 18 ? ['Selam', 'Tekrar hoş geldin', 'Kaldığın yerden?']
       : ['İyi akşamlar', 'Akşam turu mu?', 'Hoş geldin']
     );
@@ -136,7 +136,7 @@ const App = (() => {
     const goal = s.dailyGoal || 20;
     const today = Storage.reviewsToday();
     el('mode-hint').textContent = learned
-      ? `🔥 ${st.streak} günlük seri · ${learned} kelime · bugün ${today}/${goal}`
+      ? `${st.streak} günlük seri · ${learned} kelime · bugün ${today}/${goal}`
       : 'Hazır olduğunda bir mod seç, başlayalım.';
 
     el('mode-picker').querySelectorAll('.mode-card').forEach(btn => {
@@ -302,7 +302,7 @@ const App = (() => {
   function showGoalBanner(goal) {
     const banner = el('goal-banner');
     banner.textContent = pick([
-      `Günlük hedefini tamamladın 👏 İstersen devam, istersen burada bırak.`,
+      `Günlük hedefini tamamladın. İstersen devam, istersen burada bırak.`,
       `${goal} cevap tamam — bugünlük üstüne düşeni yaptın. Gerisi keyfine kalmış.`,
       `Hedefe ulaştın. Devam etmek tamamen sana kalmış.`,
     ]);
@@ -712,7 +712,7 @@ const App = (() => {
   function finishSession() {
     const acc = session.total ? Math.round((session.correct / session.total) * 100) : 0;
     el('done-title').textContent = pick(
-      acc >= 80 ? ['İyi gidiyor 👏', 'Bu tur temizdi', 'Güzel çalışma']
+      acc >= 80 ? ['İyi gidiyor', 'Bu tur temizdi', 'Güzel çalışma']
       : ['Tur bitti', 'Oturum tamam', 'Eh, fena değil']
     );
     el('done-summary').textContent =
@@ -727,7 +727,7 @@ const App = (() => {
     if (newBadges.length) {
       const h = document.createElement('div');
       h.className = 'muted small';
-      h.textContent = 'Yeni rozet açıldı! 🎖️';
+      h.textContent = 'Yeni rozet açıldı';
       box.appendChild(h);
       newBadges.forEach(b => {
         const chip = document.createElement('span');
@@ -891,7 +891,7 @@ const App = (() => {
     Game.checkBadges(Storage.getStats(), Storage.getProgress(), WORDS);
     el('go-score').textContent = `${game.score} puan`;
     el('go-best').textContent = isBest
-      ? '🏆 Yeni rekor!'
+      ? 'Yeni rekor!'
       : `En iyi: ${stats.bestScore || 0} puan`;
     el('go-again').onclick = () => startTimedGame();
     show('gameover');
@@ -913,7 +913,7 @@ const App = (() => {
     el('xp-total').textContent = `${st.xp || 0} XP toplam`;
     el('xp-fill').style.width = info.pct + '%';
     el('xp-next').textContent = `Sonraki seviyeye ${info.toNext} XP`;
-    el('best-score').textContent = `🏆 Hız Turu rekoru: ${st.bestScore || 0} puan`;
+    el('best-score').textContent = `Hız Turu rekoru: ${st.bestScore || 0} puan`;
 
     el('s-learned').textContent = learned;
     el('s-reviews').textContent = st.reviews;
