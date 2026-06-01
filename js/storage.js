@@ -19,6 +19,7 @@ const Storage = (() => {
     correct: 0,
     xp: 0,            // toplam kazanılan XP
     badges: [],       // açılan rozet id'leri
+    bestScore: 0,     // Hız Turu en iyi puan
     history: {},      // 'YYYY-MM-DD' -> reviewed count
     streak: 0,
     lastDay: null,

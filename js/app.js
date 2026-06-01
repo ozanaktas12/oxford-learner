@@ -104,6 +104,8 @@ const App = (() => {
     }
     el('done').classList.add('hidden');
     el('empty').classList.add('hidden');
+    el('gameover').classList.add('hidden');
+    el('game-hud').classList.add('hidden');
     el('session-wrap').classList.add('hidden');
     el('mode-picker').classList.remove('hidden');
 
@@ -125,6 +127,9 @@ const App = (() => {
   /** Oturumu yarıda bırakıp mod seçimine dön (ilerleme zaten kayıtlı). */
   function exitSession() {
     try { speechSynthesis.cancel(); } catch (_) {}
+    clearTimeout(timedTimer);
+    game = null;                      // bekleyen oyun zamanlayıcılarını etkisizle
+    el('game-hud').classList.add('hidden');
     // Erken çıkışta da kazanılan rozetleri kaydet
     Game.checkBadges(Storage.getStats(), Storage.getProgress(), WORDS);
     setupPicker();
@@ -168,8 +173,12 @@ const App = (() => {
 
     el('session-wrap').classList.remove('hidden');
     el('goal-banner').classList.add('hidden');
+    el('game-hud').classList.add('hidden');
     bindStudyControls();
     updateXpTag();
+
+    if (mode === 'timed') { setProgressVisible(false); startTimedGame(); return; }
+    setProgressVisible(true);
     updateProgress();
 
     if (mode === 'match') startMatchRound();
@@ -187,10 +196,16 @@ const App = (() => {
 
   function show(id) {
     el('mode-picker').classList.add('hidden');
-    ['quiz', 'match', 'done', 'empty'].forEach(p => el(p).classList.add('hidden'));
+    ['quiz', 'match', 'done', 'empty', 'gameover'].forEach(p => el(p).classList.add('hidden'));
     const inSession = (id === 'quiz' || id === 'match');
     el('session-wrap').classList.toggle('hidden', !inSession);
     el(id).classList.remove('hidden');
+  }
+
+  /** Oturum ilerleme çubuğunu göster/gizle (Hız Turu'nda gizli). */
+  function setProgressVisible(v) {
+    el('session-progress').parentElement.style.display = v ? '' : 'none';
+    el('session-meta').style.display = v ? '' : 'none';
   }
 
   // ---- Telaffuz (Web Speech) ----
@@ -325,6 +340,7 @@ const App = (() => {
   function renderQuiz(item) {
     const word = item.word;
     show('quiz');
+    el('game-hud').classList.add('hidden');
     el('q-level').textContent = word.level;
     el('q-feedback').classList.add('hidden');
     el('q-next').classList.add('hidden');
@@ -527,6 +543,7 @@ const App = (() => {
 
     matchState = { group, solved: 0, errored: new Set(), drag: null };
     show('match');
+    el('game-hud').classList.add('hidden');
     el('match-feedback').classList.add('hidden');
     el('match-next').classList.add('hidden');
 
@@ -695,6 +712,163 @@ const App = (() => {
     show('done');
   }
 
+  // -------------------------------------------------------------- Hız Turu (arcade)
+  let game = null;
+  let timedTimer = null;
+  const TIMED_TIME = 8000;   // soru başına süre (ms)
+
+  function startTimedGame() {
+    const s = Storage.getSettings();
+    const pool = WORDS.filter(w => s.levels.includes(w.level));
+    game = { pool, hearts: 3, score: 0, combo: 0, answered: false, last: null };
+    el('game-hud').classList.remove('hidden');
+    updateHud();
+    nextTimedQuestion();
+  }
+
+  function nextTimedQuestion() {
+    if (!game) return;
+    if (game.hearts <= 0) { endTimedGame(); return; }
+    game.answered = false;
+
+    // rastgele kelime (arka arkaya aynı gelmesin)
+    let word;
+    do { word = game.pool[Math.floor(Math.random() * game.pool.length)]; }
+    while (game.pool.length > 1 && word === game.last);
+    game.last = word;
+
+    const q = Quiz.generate(word, WORDS, 'mcq');
+    game.current = { word, q, start: Date.now() };
+    currentQ = q;   // klavye (1-4) için
+
+    show('quiz');
+    el('game-hud').classList.remove('hidden');
+    el('q-level').textContent = word.level;
+    el('q-feedback').classList.add('hidden');
+    el('q-next').classList.add('hidden');
+    el('q-audio').classList.add('hidden');
+    el('q-prompt').textContent = q.prompt;
+
+    el('q-input').classList.add('hidden');
+    el('q-submit').classList.add('hidden');
+    const optBox = el('q-options');
+    optBox.classList.remove('hidden');
+    optBox.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'option';
+      b.dataset.val = opt;
+      const num = document.createElement('span');
+      num.className = 'opt-num';
+      num.textContent = i + 1;
+      b.appendChild(num);
+      b.appendChild(document.createTextNode(opt));
+      b.onclick = () => answerTimed(b, opt);
+      optBox.appendChild(b);
+    });
+
+    startTimedTimer();
+  }
+
+  function startTimedTimer() {
+    const bar = el('hud-timer-bar');
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    void bar.offsetWidth;                 // reflow
+    bar.style.transition = `width ${TIMED_TIME}ms linear`;
+    bar.style.width = '0%';
+    clearTimeout(timedTimer);
+    timedTimer = setTimeout(timedTimeout, TIMED_TIME);
+  }
+
+  function freezeTimer() {
+    const bar = el('hud-timer-bar');
+    const w = getComputedStyle(bar).width;
+    bar.style.transition = 'none';
+    bar.style.width = w;
+  }
+
+  function recordTimed(correct) {
+    const w = game.current.word;
+    recordAnswer({ word: w, isNew: !Storage.getCard(w.key) }, correct, 'mcq');
+  }
+
+  function answerTimed(btn, choice) {
+    if (!game || game.answered) return;
+    game.answered = true;
+    clearTimeout(timedTimer);
+    freezeTimer();
+    const answer = game.current.q.answer;
+    const correct = choice === answer;
+    el('q-options').querySelectorAll('button').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.val === answer) b.classList.add('correct');
+      else if (b === btn && !correct) b.classList.add('wrong');
+    });
+    recordTimed(correct);
+
+    if (correct) {
+      const elapsed = Date.now() - game.current.start;
+      const timeBonus = Math.max(0, Math.round((TIMED_TIME - elapsed) / 100)); // ~0-80
+      game.combo += 1;
+      const mult = 1 + Math.floor(game.combo / 3);
+      const pts = (10 + timeBonus) * mult;
+      game.score += pts;
+      scorePop(`+${pts}${mult > 1 ? ` ×${mult}` : ''}`);
+    } else {
+      game.hearts -= 1;
+      game.combo = 0;
+    }
+    updateHud();
+    setTimeout(() => { if (!game) return; game.hearts <= 0 ? endTimedGame() : nextTimedQuestion(); }, correct ? 480 : 950);
+  }
+
+  function timedTimeout() {
+    if (!game || game.answered) return;
+    game.answered = true;
+    freezeTimer();
+    el('q-options').querySelectorAll('button').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.val === game.current.q.answer) b.classList.add('correct');
+    });
+    recordTimed(false);
+    game.hearts -= 1;
+    game.combo = 0;
+    updateHud();
+    setTimeout(() => { if (!game) return; game.hearts <= 0 ? endTimedGame() : nextTimedQuestion(); }, 950);
+  }
+
+  function updateHud() {
+    const h = Math.max(0, game.hearts);
+    el('hud-hearts').textContent = '❤️'.repeat(h) + '🤍'.repeat(3 - h);
+    el('hud-score').textContent = game.score;
+    el('hud-combo').textContent = game.combo >= 2 ? `🔥 ${game.combo}x` : '';
+  }
+
+  function scorePop(text) {
+    const pop = document.createElement('span');
+    pop.className = 'score-pop';
+    pop.textContent = text;
+    el('game-hud').appendChild(pop);
+    setTimeout(() => pop.remove(), 750);
+  }
+
+  function endTimedGame() {
+    if (!game) return;
+    clearTimeout(timedTimer);
+    el('game-hud').classList.add('hidden');
+    const stats = Storage.getStats();
+    const isBest = game.score > (stats.bestScore || 0);
+    if (isBest) { stats.bestScore = game.score; Storage.saveStats(stats); }
+    Game.checkBadges(Storage.getStats(), Storage.getProgress(), WORDS);
+    el('go-score').textContent = `${game.score} puan`;
+    el('go-best').textContent = isBest
+      ? '🏆 Yeni rekor!'
+      : `En iyi: ${stats.bestScore || 0} puan`;
+    el('go-again').onclick = () => startTimedGame();
+    show('gameover');
+  }
+
   // -------------------------------------------------------------------- Stats
   async function initStats() {
     await loadWords();
@@ -711,6 +885,7 @@ const App = (() => {
     el('xp-total').textContent = `${st.xp || 0} XP toplam`;
     el('xp-fill').style.width = info.pct + '%';
     el('xp-next').textContent = `Sonraki seviyeye ${info.toNext} XP`;
+    el('best-score').textContent = `🏆 Hız Turu rekoru: ${st.bestScore || 0} puan`;
 
     el('s-learned').textContent = learned;
     el('s-reviews').textContent = st.reviews;

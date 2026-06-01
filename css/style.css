@@ -454,6 +454,39 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .form-group label.switch-label input { width: 18px; height: 18px; accent-color: var(--primary); flex: none; }
 
 /* =========================================================================
+   Hız Turu (arcade) — HUD, kalpler, timer, combo
+   ========================================================================= */
+.game-hud { position: relative; margin-bottom: 1.3rem; }
+.hud-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: .55rem; }
+.hud-hearts { font-size: 1.15rem; letter-spacing: 3px; }
+.hud-combo { color: var(--amber); font-weight: 800; font-size: .95rem; min-width: 60px; text-align: center; }
+.hud-score { font-weight: 800; font-size: 1.3rem; color: var(--primary); letter-spacing: -.02em; }
+.hud-timer { height: 8px; background: var(--surface-2); border-radius: var(--radius-pill); overflow: hidden; }
+.hud-timer-bar {
+  height: 100%; width: 100%; border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--red), var(--amber) 45%, var(--green));
+}
+.score-pop {
+  position: absolute; right: .4rem; top: 1.9rem; pointer-events: none;
+  color: var(--green); font-weight: 800; font-size: 1.15rem;
+  animation: scorePop .75s ease forwards;
+}
+@keyframes scorePop {
+  0% { opacity: 0; transform: translateY(8px) scale(.8); }
+  20% { opacity: 1; transform: translateY(0) scale(1.12); }
+  100% { opacity: 0; transform: translateY(-24px) scale(1); }
+}
+.mode-card-game { border-color: rgba(247, 185, 74, .4); }
+.mode-card-game:hover { border-color: var(--amber); }
+.mode-card-game .mode-name { color: var(--amber); }
+
+/* =========================================================================
+   Marka logosu
+   ========================================================================= */
+.brand { display: flex; align-items: center; gap: .55rem; }
+.brand-mark { width: 26px; height: 26px; flex: none; }
+
+/* =========================================================================
    Duyarlı (mobil)
    ========================================================================= */
 @media (max-width: 720px) {

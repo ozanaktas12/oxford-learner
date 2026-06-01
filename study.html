@@ -11,7 +11,17 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">📘 Oxford Learner</div>
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true">
+        <rect width="36" height="36" rx="9" fill="url(#bm)" />
+        <path d="M18 10c-3-1.6-6-1.6-9 0v15c3-1.6 6-1.6 9 0V10z" fill="#fff" opacity=".95" />
+        <path d="M18 10c3-1.6 6-1.6 9 0v15c-3-1.6-6-1.6-9 0V10z" fill="#fff" opacity=".72" />
+        <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6d8bff" /><stop offset="1" stop-color="#9db3ff" />
+        </linearGradient></defs>
+      </svg>
+      <span>Oxford Learner</span>
+    </div>
     <nav class="nav">
       <a href="index.html">Panel</a>
       <a href="study.html" class="active">Çalış</a>
@@ -56,6 +66,11 @@
           <span class="mode-name">Dinleme</span>
           <span class="mode-desc">Okunan kelimenin anlamını bul</span>
         </button>
+        <button class="mode-card mode-card-game" data-mode="timed">
+          <span class="mode-icon">🏆</span>
+          <span class="mode-name">Hız Turu</span>
+          <span class="mode-desc">Geri sayım, can ve combo ile puan topla</span>
+        </button>
       </div>
     </section>
 
@@ -71,6 +86,16 @@
       </div>
 
       <div id="goal-banner" class="goal-banner hidden"></div>
+
+      <!-- Hız Turu HUD'u -->
+      <div id="game-hud" class="game-hud hidden">
+        <div class="hud-row">
+          <span id="hud-hearts" class="hud-hearts"></span>
+          <span id="hud-combo" class="hud-combo"></span>
+          <span id="hud-score" class="hud-score">0</span>
+        </div>
+        <div class="hud-timer"><div id="hud-timer-bar" class="hud-timer-bar"></div></div>
+      </div>
 
       <!-- Tek soru (mcq / type / listen) -->
       <section id="quiz" class="panel hidden">
@@ -107,6 +132,17 @@
       <div id="done-badges" class="badge-row"></div>
       <div class="actions">
         <button id="again-btn" class="btn btn-ghost">Yeni oturum</button>
+        <a href="index.html" class="btn btn-primary">Panele dön</a>
+      </div>
+    </section>
+
+    <!-- Hız Turu sonu -->
+    <section id="gameover" class="panel hidden">
+      <h2>⏱️ Oyun bitti!</h2>
+      <div id="go-score" class="done-xp"></div>
+      <p id="go-best" class="muted"></p>
+      <div class="actions">
+        <button id="go-again" class="btn btn-ghost">Tekrar oyna</button>
         <a href="index.html" class="btn btn-primary">Panele dön</a>
       </div>
     </section>
