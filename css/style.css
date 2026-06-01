@@ -487,6 +487,16 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 .brand-mark { width: 26px; height: 26px; flex: none; }
 
 /* =========================================================================
+   Footer (kaynak / atıf)
+   ========================================================================= */
+.site-footer {
+  max-width: 960px; margin: 0 auto; padding: 1.6rem 1.3rem 2.6rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted); font-size: .8rem; line-height: 1.65; text-align: center;
+}
+.site-footer strong { color: var(--text-dim); font-weight: 600; }
+
+/* =========================================================================
    Duyarlı (mobil)
    ========================================================================= */
 @media (max-width: 720px) {
