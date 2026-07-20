@@ -5,6 +5,8 @@
 uygulaması. Backend yok, API anahtarı yok; tüm ilerleme tarayıcının
 `localStorage`'ında tutulur. Vercel'e statik olarak deploy edilir.
 
+**🔗 Canlı demo:** https://oxford-learner.vercel.app
+
 ## Özellikler
 - **Dashboard** — tekrar/yeni/öğrenilen sayıları, seviyeye göre ilerleme.
 - **Çalışma akışı**
